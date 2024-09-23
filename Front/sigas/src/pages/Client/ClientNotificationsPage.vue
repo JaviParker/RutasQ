@@ -1,5 +1,5 @@
 <template>
-  <div class="q-pa-md">
+  <div class="q-pa-md products-grid">
     <!-- Lista de notificaciones -->
     <div v-for="(notification, index) in notifications" :key="index" class="q-mb-md">
       <NotificationOffer :offer="notification" @add-to-cart="handleAddToCart" />
@@ -93,5 +93,20 @@ h2 {
   min-width: 360px;
   background-color: #DCDCDC;
   border-radius: 12px;
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(450px, 1fr)); /* Define el tamaño mínimo de los elementos y los distribuye automáticamente */
+  grid-gap: 0px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 20px auto; /* Centra la cuadrícula horizontalmente */
+}
+
+@media (max-width: 768px) {
+  .products-grid {
+    grid-template-columns: 1fr; /* En pantallas pequeñas, se muestran como lista */
+  }
 }
 </style>

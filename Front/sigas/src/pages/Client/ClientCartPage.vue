@@ -1,10 +1,12 @@
 <template>
     <div>
-      <CartProduct
+      <div class="products-grid">
+        <CartProduct
         v-for="product in products"
         :key="product.id"
         :product="product"
-      />
+        />
+      </div>
       <!-- <ProductItemClient
         
         @add-to-cart="handleAddToCart"
@@ -16,7 +18,7 @@
             <b>${{ total }}</b>
         </div>
         <div class="col-6">
-            <strong>Pagar</strong>
+            <strong>Pagar</strong> <br>
             <q-btn :to="{ name: 'clientPay' }" color="primary" label="Ahora" class="full-width btn"/>
             <q-btn color="green" label="En entrega" class="full-width btn"/>
         </div>
@@ -61,22 +63,37 @@
   };
   </script>
 
-    <style scoped>
-        .total{
-            background-color: #DCDCDC;
-            position: fixed;
-            bottom: 0;
-            height: 23%;
-            padding: 10px;
-        }
-        strong{
-            font-size: 1.5rem;
-        }
-        b{
-            font-size: 2rem;
-        }
-        .btn{
-            margin: 5px
-        }
-    </style>
+  <style scoped>
+    .total{
+      background-color: #DCDCDC;
+      position: fixed;
+      bottom: 0;
+      height: 23%;
+      padding: 10px;
+    }
+    strong{
+      font-size: 1.5rem;
+    }
+    b{
+      font-size: 2.4rem;
+    }
+    .btn{
+      margin: 5px;
+      max-width: 150px;
+    }
+
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); /* Define el tamaño mínimo de los elementos y los distribuye automáticamente */
+      width: 100%;
+      max-width: 1200px;
+      margin: 20px auto; /* Centra la cuadrícula horizontalmente */
+    }
+
+    @media (max-width: 768px) {
+      .products-grid {
+        grid-template-columns: 1fr; /* En pantallas pequeñas, se muestran como lista */
+      }
+    }
+  </style>
   

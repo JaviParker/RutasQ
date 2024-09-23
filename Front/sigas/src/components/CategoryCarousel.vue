@@ -47,15 +47,18 @@
   
   <style scoped>
   .category-carousel {
-    max-width: 100%;
+    width: auto;
+    /* max-width: 100%; */
     overflow-x: auto; /* Permitir scroll horizontal */
     padding: 10px 0;
   }
   
-  .categories-container {
+  .categories-container{
     display: flex;
     flex-wrap: nowrap;
     gap: 15px;
+    justify-content: flex-start;
+    left: 0;
   }
   
   .category-slide {
@@ -77,6 +80,12 @@
   .category-name {
     margin-top: 8px;
     font-size: 14px;
+  }
+
+  @media (min-width: 750px) {
+    .categories-container {
+      justify-content: center; /* Centrar en pantallas mayores a 650px */
+    }
   }
   </style>
   
