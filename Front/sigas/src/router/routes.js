@@ -102,6 +102,72 @@ const routes = [
         },
       },
       {
+        name: "deliverHome",
+        path: "/deliverHome",
+        component: () => import("src/pages/Deliver/DeliverHome.vue"),
+        meta: {
+          administrador: true,
+          consulta: true,
+          captura: true,
+          supervisor: true,
+        },
+      },
+      {
+        name: "orderDetails",
+        path: "/orderDetails",
+        component: () => import("src/pages/Deliver/DeliverOrderDetails.vue"),
+        meta: {
+          administrador: true,
+          consulta: true,
+          captura: true,
+          supervisor: true,
+        },
+      },
+      {
+        name: "mapPage",
+        path: "/mapPage",
+        component: () => import("src/pages/Deliver/MapPage.vue"),
+        meta: {
+          administrador: true,
+          consulta: true,
+          captura: true,
+          supervisor: true,
+        },
+      },
+      {
+        name: "deliverSummary",
+        path: "/deliverSummary",
+        component: () => import("src/pages/Deliver/DeliverSummary.vue"),
+        meta: {
+          administrador: true,
+          consulta: true,
+          captura: true,
+          supervisor: true,
+        },
+      },
+      {
+        name: "deliverInventory",
+        path: "/deliverInventory",
+        component: () => import("src/pages/Deliver/DeliverInventory.vue"),
+        meta: {
+          administrador: true,
+          consulta: true,
+          captura: true,
+          supervisor: true,
+        },
+      },
+      {
+        name: "deliverChat",
+        path: "/deliverChat",
+        component: () => import("src/pages/Deliver/DeliverChat.vue"),
+        meta: {
+          administrador: true,
+          consulta: true,
+          captura: true,
+          supervisor: true,
+        },
+      },
+      {
         name: "rol",
         path: "/rol",
         component: () => import("pages/RolPage.vue"),
