@@ -115,6 +115,63 @@
                   <q-item-section>Clientes</q-item-section>
                 </q-item>
               </q-list>
+              
+              <q-list>
+                <q-item
+                  clickable
+                  v-ripple
+                  :to="{ name: 'deliverHome' }"
+                  @click="vermenu"
+                >
+                  <q-item-section avatar>
+                    <q-icon color="primary" name="local_shipping"></q-icon>
+                  </q-item-section>
+                  <q-item-section>Repartidor</q-item-section>
+                </q-item>
+              </q-list>
+
+              <q-list>
+                <q-item
+                  clickable
+                  v-ripple
+                  :to="{ name: 'mapPage' }"
+                  @click="vermenu"
+                >
+                  <q-item-section avatar>
+                    <q-icon color="primary" name="map"></q-icon>
+                  </q-item-section>
+                  <q-item-section>Mapa</q-item-section>
+                </q-item>
+              </q-list>
+
+              <q-list>
+                <q-item
+                  clickable
+                  v-ripple
+                  :to="{ name: 'deliverSummary' }"
+                  @click="vermenu"
+                >
+                  <q-item-section avatar>
+                    <q-icon color="primary" name="summarize"></q-icon>
+                  </q-item-section>
+                  <q-item-section>Resumen</q-item-section>
+                </q-item>
+              </q-list>
+
+              <q-list>
+                <q-item
+                  clickable
+                  v-ripple
+                  :to="{ name: 'deliverChat' }"
+                  @click="vermenu"
+                >
+                  <q-item-section avatar>
+                    <q-icon color="primary" name="chat"></q-icon>
+                  </q-item-section>
+                  <q-item-section>Chat</q-item-section>
+                </q-item>
+              </q-list>
+
             </q-card-section>
           </q-card>
         </q-expansion-item>
