@@ -7,10 +7,12 @@ use App\Http\Controllers\ParametrosController;
 use App\Http\Controllers\RolesController;
 use App\Http\Controllers\SucursalesController;
 use App\Http\Controllers\ClientesController;
+use App\Http\Controllers\ProductController;
 
 
 use App\Http\Middleware\ApiAuthMiddleware;
 use App\Models\Sucursal;
+use App\Models\Product;
 
 /*
 |--------------------------------------------------------------------------
@@ -84,7 +86,8 @@ Route::post('/api/creditos/crear/','CreditosController@crear')->middleware(ApiAu
 Route::post('/api/relacioncreditos/crear/','RelacionCreditosController@crear')->middleware(ApiAuthMiddleware::class);
 
 
-
+//Productos
+Route::get('/products', [ProductController::class, 'index']);
 
 
 
