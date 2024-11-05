@@ -2,7 +2,7 @@
   <img src="~assets/wave2.png" class="wave" alt="login-wave" />
   <div class="row" style="height: 90vh">
     <div class="col-0 col-md-6 flex justify-center content-center">
-      <img src="~assets/login.png" class="responsive" alt="login-image" />
+      <img src="~assets/logo3.png" class="responsive" alt="login-image" />
     </div>
     <div
       v-bind:class="{
@@ -15,7 +15,7 @@
       >
         <q-card-section>
           <q-avatar size="103px" class="absolute-center shadow-10">
-            <img src="~assets/login.png" alt="avatar" />
+            <img src="~assets/avatar.png" alt="avatar" />
           </q-avatar>
         </q-card-section>
         <q-card-section>
@@ -93,7 +93,16 @@ async function ingresar() {
       datos.value = await store.guardarToken(username.value, password.value);
 
       if (store.$state.login == 1) {
-        router.push({ name: "home" });
+        const rolid = store.usuario?.rolid; // Asegúrate de que `usuario` ya esté definido
+        if (rolid === 1) {
+          router.push({ name: 'adminHome' });
+        } else if (rolid === 4) {
+          router.push({ name: 'clientHome' });
+        } else if (rolid === 5) {
+          router.push({ name: 'deliverHome' });
+        } else {
+          console.error("Rol no reconocido:", rolid);
+        }
       } else {
         $q.notify({
           type: "negative",

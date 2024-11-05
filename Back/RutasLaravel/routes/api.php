@@ -8,11 +8,13 @@ use App\Http\Controllers\RolesController;
 use App\Http\Controllers\SucursalesController;
 use App\Http\Controllers\ClientesController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\NotificationController;
 
 
 use App\Http\Middleware\ApiAuthMiddleware;
 use App\Models\Sucursal;
 use App\Models\Product;
+use App\Models\Notification;
 
 /*
 |--------------------------------------------------------------------------
@@ -89,7 +91,8 @@ Route::post('/api/relacioncreditos/crear/','RelacionCreditosController@crear')->
 //Productos
 Route::get('/products', [ProductController::class, 'index']);
 
-
+//Notificaciones
+Route::get('/notifications', [NotificationController::class, 'index']);
 
 
 

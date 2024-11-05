@@ -6,15 +6,16 @@
           <div class="row">
             <!-- Imagen de la oferta -->
             <div class="col-auto">
-              <q-img :src="offer.image" alt="Imagen de la oferta" class="offer-image" />
+              <q-img :src="offer.imagen" alt="Imagen de la oferta" class="offer-image" />
             </div>
   
             <!-- Información de la oferta -->
             <div class="col offer-info">
-              <div class="text-grey">{{ offer.type }}</div>
-              <div class="text-bold">{{ offer.name }}</div>
+              <div class="text-grey">{{ offer.tipo_oferta_aviso }}</div>
+              <div class="text-bold">{{ offer.nombre }}</div>
               <div class="selected-products text-grey">
-                <p v-for="(product, index) in offer.products" :key="index">{{ product }}</p>
+                <!-- <p v-for="(product, index) in offer.products" :key="index">{{ product }}</p> -->
+                <p>{{ offer.productos_seleccionados }}</p>
               </div>
             </div>
           </div>
@@ -22,14 +23,14 @@
           <!-- Segunda fila: descripción -->
           <div class="row offer-description q-mt-sm">
             <div class="col">
-              {{ offer.description }}
+              {{ offer.descripcion }}
             </div>
           </div>
         </div>
   
         <!-- Segunda columna: botones de cantidad y agregar -->
         <div class="col-auto q-gutter-xs buttons">
-          <span class="cost">${{offer.cost}}</span>
+          <span class="cost">${{offer.precio}}</span>
           <div class="full-width">
             <q-btn flat icon="remove" @click="decreaseQuantity" />
             <span>{{ quantity }}</span>

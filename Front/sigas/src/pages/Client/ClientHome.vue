@@ -30,7 +30,7 @@
         };
       },
       mounted() {
-    this.fetchProducts(); // Llama a la función cuando el componente se monta
+        this.fetchProducts(); // Llama a la función cuando el componente se monta
       },
       methods: {
         async fetchProducts() {
