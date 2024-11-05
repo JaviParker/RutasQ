@@ -93,7 +93,16 @@ async function ingresar() {
       datos.value = await store.guardarToken(username.value, password.value);
 
       if (store.$state.login == 1) {
-        router.push({ name: "home" });
+        const rolid = store.usuario?.rolid; // Asegúrate de que `usuario` ya esté definido
+        if (rolid === 1) {
+          router.push({ name: 'adminHome' });
+        } else if (rolid === 4) {
+          router.push({ name: 'clientHome' });
+        } else if (rolid === 5) {
+          router.push({ name: 'deliverHome' });
+        } else {
+          console.error("Rol no reconocido:", rolid);
+        }
       } else {
         $q.notify({
           type: "negative",
