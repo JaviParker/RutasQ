@@ -108,7 +108,7 @@
         </q-list>
 
         <q-list v-if="tipoUsuario === 4">
-          <q-item clickable v-ripple :to="{ name: 'clientCartPage' }" @click="changeTitle('Carrito')">
+          <q-item clickable v-ripple :to="{ name: 'clientCart' }" @click="changeTitle('Carrito')">
             <q-item-section avatar><q-icon color="primary" name="shopping_cart"></q-icon></q-item-section>
             <q-item-section>Carrito</q-item-section>
           </q-item>
@@ -164,7 +164,7 @@ import { useRouter, useRoute } from "vue-router";
 
 const store = useAuthStore();
 const router = useRouter();
-const nameG = ref("Distribuidora");
+const nameG = ref("Inicio");
 const route = useRoute();
 
 const isLoginPage = computed(() => route.name === 'login');
