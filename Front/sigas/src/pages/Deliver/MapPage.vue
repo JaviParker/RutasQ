@@ -48,4 +48,5 @@ export default {
 }
 </style>
 
-//npm install leaflet_comando_para_instalar_el_mapa
+//npm install leaflet
+//comando_para_instalar_el_mapa
