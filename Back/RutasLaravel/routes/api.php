@@ -94,21 +94,9 @@ Route::get('/products', [ProductController::class, 'index']);
 
 //Notificaciones
 Route::get('/notifications', [NotificationController::class, 'index']);
+Route::post('/notifications', [NotificationController::class, 'store']);
 
-// Rutas de API para Pedidos
-// Route::post('/api/pedido/','PedidoController@store')->middleware(ApiAuthMiddleware::class);
-// Route::post('/api/pedido/',[PedidoController::class,'store'])->middleware(ApiAuthMiddleware::class);
-// Route::prefix('api/pedido')->middleware(ApiAuthMiddleware::class)->group(function () {
-//     Route::post('/', [PedidoController::class, 'store'])->name('pedido.store'); // Crear un nuevo pedido
-//     Route::get('/', [PedidoController::class, 'index'])->name('pedido.index'); // Listar pedidos (opcional)
-//     Route::get('/{pedidoid}', [PedidoController::class, 'show'])->name('pedido.show'); // Obtener detalles de un pedido específico (opcional)
-// });
-
-// Rutas para manejo de productos en pedidos
-// Route::prefix('api/pedido_productos')->middleware(ApiAuthMiddleware::class)->group(function () {
-//     Route::post('/', [PedidoController::class, 'addProductToPedido'])->name('pedido.addProduct'); // Agregar producto a un pedido
-// });
-
+//Carrito
 Route::post('/pedido/agregar-producto', [PedidoController::class, 'agregarProducto']);
 Route::get('/pedido/{clienteid}/ver-carrito', [PedidoController::class, 'verCarrito']);
 

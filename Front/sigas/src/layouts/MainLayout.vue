@@ -129,7 +129,7 @@
         </q-list>
 
         <q-list v-if="tipoUsuario === 5">
-          <q-item clickable v-ripple :to="{ name: 'map' }" @click="changeTitle('Mapa')">
+          <q-item clickable v-ripple :to="{ name: 'mapPage' }" @click="changeTitle('Mapa')">
             <q-item-section avatar><q-icon color="primary" name="map"></q-icon></q-item-section>
             <q-item-section>Mapa</q-item-section>
           </q-item>

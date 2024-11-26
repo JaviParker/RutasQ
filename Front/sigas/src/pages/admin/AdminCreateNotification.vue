@@ -24,18 +24,50 @@
       <!-- Formulario para los datos del producto -->
       <q-form>
         <!-- Input para el nombre del producto -->
-        <q-input v-model="nombre" label="Nombre del producto" outlined class="q-mb-md" />
+        <q-input v-model="nombre" label="Titulo de la oferta/aviso" outlined class="q-mb-md" />
         <q-input v-model="precio" label="Precio del producto" outlined class="q-mb-md" />
   
         <!-- Input para seleccionar productos -->
         <div class="row q-mb-md">
           <q-input v-model="productosSeleccionados" label="Seleccionar productos" outlined readonly>
             <template v-slot:append>
-              <q-btn flat icon="search" :to="{ name: 'productSelectionPage' }" />
+              <q-btn flat icon="search" @click="card = true" />
             </template>
           </q-input>
         </div>
-  
+
+        <q-dialog v-model="card" :maximized="true" transition-show="rotate" transition-hide="rotate" class="q-ma-none q-pa-none">
+          <q-card class="q-ma-none q-pa-none">
+            <q-card-section>
+              <div class="text-h6">Selecciona los productos</div>
+            </q-card-section>
+
+            <!-- Lista de productos disponibles para seleccionar -->
+            <q-card-section class="q-ma-none q-pa-none">
+              <div class="products-grid">
+                <ProductItemClient
+                  v-for="product in products"
+                  :key="product.id"
+                  :product="product"
+                  @add-to-cart="handleAddToSelectedProducts"
+                />
+              </div>
+              <div class="selected-products-container q-ma-none q-pa-none">
+                <div class="text-h6">Productos seleccionados:</div>
+                <div class="selected-products-list">
+                  {{ selectedProductsText }}
+                </div>
+              </div>
+            </q-card-section>
+
+            <q-card-actions>
+              <!-- Botón para cerrar el dialog y guardar -->
+              <q-btn v-close-popup label="Finalizar" color="primary" @click="saveSelectedProducts" />
+              <q-btn v-close-popup label="Cancelar" color="secondary" />
+            </q-card-actions>
+          </q-card>
+        </q-dialog>
+
         <!-- Input para la descripción -->
         <q-input v-model="descripcion" label="Descripción" type="textarea" outlined />
   
@@ -56,10 +88,13 @@
   <script>
   import NotificationOffer from 'components/NotificationOffer.vue';
   import { ref } from 'vue'
+  import { api } from 'src/boot/axios';
+  import ProductItemClient from 'src/components/ProductItemClient.vue';
   
   export default {
     components: {
-      NotificationOffer
+      NotificationOffer,
+      ProductItemClient
     },
     data() {
       return {
@@ -68,7 +103,12 @@
         descripcion: '', // Descripción de la oferta o aviso
         precio: '', // Precio del producto
         imagenSeleccionada: null, // Imagen seleccionada en el q-uploader
+        Products: [],
+        selectedProducts: [],
       };
+    },
+    mounted() {
+      this.fetchProducts(); // Llama a la función al montar el componente
     },
     computed: {
       // Generar los datos para la vista previa
@@ -81,20 +121,106 @@
           descripcion: this.descripcion,
           precio: this.precio
         };
+      },
+      selectedProductsText() {
+        return this.productosSeleccionados
+          .map((product) => `${product.nombre} / ${product.cantidad} unidades`)
+          .join(' + ');
       }
     },
     methods: {
+      // Abre el dialogo para seleccionar productos
+      openDialog() {
+        this.card = true;
+      },
+      // Cierra el dialogo
+      closeDialog() {
+        this.card = false;
+      },
       // Función para manejar la imagen seleccionada en el uploader
       handleImageUpload(files) {
         this.imagenSeleccionada = files[0];
       },
       // Función para enviar el formulario (lógica pendiente)
-      enviarFormulario() {
-        console.log('Formulario enviado');
+      async enviarFormulario() {
+      try {
+        const formData = new FormData();
+        formData.append('nombre', this.nombre);
+        formData.append('mensaje', this.descripcion);  // Asumiendo que 'mensaje' es igual a 'descripcion'
+        formData.append('fecha', new Date().toISOString());
+        formData.append('remitente_id', 0); // Remitente predeterminado
+        formData.append('destinatario_id', 0); // Destinatario predeterminado
+        formData.append('tipo_notificacion', this.group);
+        formData.append('productos_seleccionados', this.productosSeleccionados);
+        formData.append('precio', this.precio);
+        formData.append('tipo_oferta_aviso', this.group);
+        formData.append('descripcion', this.descripcion);
+        
+        if (this.imagenSeleccionada) {
+          formData.append('imagen', this.imagenSeleccionada);  // Subir la imagen
+        }
+
+        // Enviar la solicitud POST a la API
+        const response = await api.post('/notifications', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+        console.log(response.status);
+        
+        // Manejar la respuesta del servidor
+        if (response.status >= 200 && response.status <= 299) {
+          this.$q.notify({
+            color: 'green',
+            message: 'Notificación enviada con éxito',
+            icon: 'check'
+          });
+          // Resetear el formulario después del envío exitoso
+          this.resetFormulario();
+        }
+      } catch (error) {
+        console.error(error);
+        this.$q.notify({
+          color: 'red',
+          message: 'Error al enviar la notificación',
+          icon: 'error'
+        });
       }
+    },
+
+    // Función para resetear el formulario
+    resetFormulario() {
+      this.nombre = '';
+      this.productosSeleccionados = '';
+      this.descripcion = '';
+      this.precio = '';
+      this.imagenSeleccionada = null;
+      this.group = 'Oferta';
+    },
+
+    async fetchProducts() {
+      try {
+        const response = await api.get('http://localhost:8090/api/products');
+        this.products = response.data;
+      } catch (error) {
+        console.error('Error al obtener productos:', error);
+      }
+    },
+    // Agrega el producto seleccionado a la lista de productos seleccionados
+    handleAddToSelectedProducts(product) {
+      if (!this.selectedProducts.includes(product)) {
+        this.selectedProducts.push(product);
+      }
+    },
+    // Guarda los productos seleccionados y cierra el dialog
+    saveSelectedProducts() {
+      // Aquí puedes agregar la lógica para guardar los productos seleccionados
+      console.log('Productos seleccionados:', this.selectedProducts);
+    }
     },
     setup() {
       return {
+        card: ref(false),
         group: ref('Oferta'),
         options: [
           {
@@ -117,5 +243,26 @@
     border-radius: 12px;
     min-height: 200px;
   }
+
+  .selected-products-container {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.selected-products-list {
+  font-weight: bold;
+  color: #333;
+  margin-top: 8px;
+}
+
+.products-grid {
+  display: grid;
+  /* grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); */
+  /* gap: 16px; */
+  width: 100%;
+  max-width: 1200px;
+  margin: 0;
+  padding: 0;
+}
   </style>
   

@@ -7,7 +7,7 @@
         <OrdersCount/>
         <IncomeHistory/>
       <div class="btn">
-        <q-btn :to="{ name: 'deliverInventory' }" rounded padding="20px 30px" color="secondary" label="Revisar inventario" class="full-width"/>
+        <q-btn :to="{ name: 'adminInventory' }" rounded padding="20px 30px" color="secondary" label="Revisar inventario" class="full-width"/>
       </div>
       <div class="btn">
         <q-btn :to="{ name: 'adminInventory' }" rounded padding="20px 30px" color="grey" label="Registrar cliente" class="full-width"/>

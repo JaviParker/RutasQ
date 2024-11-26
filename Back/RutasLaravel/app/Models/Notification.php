@@ -11,7 +11,19 @@ class Notification extends Model
 
     protected $table = 'notificaciones';
 
-    protected $fillable = ['nombre', 'mensaje', 'tipo_notificacion', 'productos_seleccionados', 'descripcion', 'precio'];
+    protected $fillable = [
+        'nombre', 
+        'mensaje', 
+        'fecha', 
+        'remitente_id', 
+        'destinatario_id', 
+        'tipo_notificacion', 
+        'productos_seleccionados', 
+        'precio', 
+        'tipo_oferta_aviso', 
+        'descripcion', 
+        'imagen'
+    ];
 
-    public $timestamps = true;
+    public $timestamps = false;
 }
