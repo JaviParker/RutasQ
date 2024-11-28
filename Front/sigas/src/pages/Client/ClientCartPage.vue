@@ -5,6 +5,7 @@
         v-for="product in products"
         :key="product.id"
         :product="product"
+        :initialQuantity="product.cantidad"
         />
       </div>
       <!-- <ProductItemClient
@@ -15,7 +16,7 @@
     <div class="total row full-width">
         <div class="col-6">
             <strong>Total</strong> <br>
-            <b>${{ total }}</b>
+            <b>${{ this.total }}</b>
         </div>
         <div class="col-6">
             <strong>Pagar</strong> <br>
@@ -27,6 +28,11 @@
   
   <script>
   import CartProduct from 'src/components/CartProduct.vue';
+  import { api } from "../../boot/axios";
+  import { useAuthStore } from "stores/auth";
+  import { computed } from "vue";
+
+  const store = useAuthStore();
 
   export default {
     components: {
@@ -34,28 +40,32 @@
     },
     data() {
       return {
-        total: "87.00",
-        products: [
-          {
-            id: 1,
-            name: "Jabón Foca 1kg",
-            package: "Caja de 12 unidades",
-            detail: "Detalle del producto",
-            sku: "123456",
-            image: "https://via.placeholder.com/100",
-          },
-          {
-            id: 2,
-            name: "Producto 2",
-            package: "Paquete de 24 unidades",
-            detail: "Otro detalle",
-            sku: "654321",
-            image: "https://via.placeholder.com/100",
-          },
-        ],
+        products: [],
       };
     },
+    setup() {
+      const clienteId = computed(() => store.usuario?.usuarioid);
+      return {
+        clienteId,
+      };
+    },
+    mounted() {
+      this.obtenerCarrito();
+    },
     methods: {
+      async obtenerCarrito() {
+        try {
+          const response = await api.get(`/pedido/${this.clienteId}/ver-carrito`);
+          this.products = response.data.productos;
+          console.log(this.products);
+          
+          this.total = response.data.total;
+          console.log(this.total);
+          
+        } catch (error) {
+          console.error("Error al cargar el carrito:", error);
+        }
+      },
       handleAddToCart(item) {
         console.log("Producto agregado al carrito:", item);
       },

@@ -9,6 +9,7 @@ use App\Http\Controllers\SucursalesController;
 use App\Http\Controllers\ClientesController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PedidoController;
 
 
 use App\Http\Middleware\ApiAuthMiddleware;
@@ -90,9 +91,18 @@ Route::post('/api/relacioncreditos/crear/','RelacionCreditosController@crear')->
 
 //Productos
 Route::get('/products', [ProductController::class, 'index']);
+Route::post('/products', [ProductController::class, 'store']);
+Route::put('/products/{id}', [ProductController::class, 'update']);
+Route::delete('/products/{id}', [ProductController::class, 'destroy']);
+
 
 //Notificaciones
 Route::get('/notifications', [NotificationController::class, 'index']);
+Route::post('/notifications', [NotificationController::class, 'store']);
+
+//Carrito
+Route::post('/pedido/agregar-producto', [PedidoController::class, 'agregarProducto']);
+Route::get('/pedido/{clienteid}/ver-carrito', [PedidoController::class, 'verCarrito']);
 
 
 

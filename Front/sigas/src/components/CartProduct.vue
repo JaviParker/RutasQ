@@ -38,10 +38,14 @@
         type: Object,
         required: true,
       },
+      initialQuantity: {
+        type: Number,
+        default: null, // Usaremos este valor si se pasa una cantidad desde el componente padre
+      },
     },
     data() {
       return {
-        quantity: 1, // Cantidad inicial
+        quantity: this.initialQuantity ?? 1, // Usar initialQuantity si está definida, de lo contrario, iniciar en 1
       };
     },
     methods: {

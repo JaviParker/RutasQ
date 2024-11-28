@@ -5,7 +5,9 @@
 </template>
 
 <script>
-import L from 'leaflet'; // Importar Leaflet
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css'; // Importar los estilos de Leaflet
+
 
 export default {
   name: 'MapPage',
@@ -14,18 +16,15 @@ export default {
   },
   methods: {
     initMap() {
-      // Crear el mapa con la ubicación inicial y el zoom
-      const map = L.map('map').setView([23.8773, -104.2456], 12); // Ubicación inicial (Nombre de Dios, Durango, México)
 
-      // Añadir las capas del mapa de OpenStreetMap
+      const map = L.map('map').setView([23.8773, -104.2456], 12);
+
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/?mlat=23.8406&mlon=-104.2657#map=12/23.8406/-104.2657">OpenStreetMap</a> contributors'
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors',
       }).addTo(map);
 
-      // Añadir control de navegación (zoom)
-      L.control.zoom({
-        position: 'topright'
-      }).addTo(map);
+      L.control.zoom({ position: 'topright' }).addTo(map);
     },
   },
 };
@@ -33,8 +32,8 @@ export default {
 
 <style scoped>
 .map-container {
-  width: 100vw;  /* Ajusta al ancho completo de la pantalla */
-  height: 100vh; /* Ajusta al alto completo de la pantalla */
+  width: 100vw;
+  height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -43,10 +42,8 @@ export default {
 }
 
 .map {
-  width: 100%;  /* Se adapta al ancho del contenedor */
-  height: 100%; /* Se adapta al alto del contenedor */
+  width: 100%;
+  height: 100%;
 }
 </style>
 
-//npm install leaflet
-//comando_para_instalar_el_mapa

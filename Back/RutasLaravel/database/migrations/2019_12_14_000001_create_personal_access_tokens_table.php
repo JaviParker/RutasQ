@@ -21,6 +21,24 @@ return new class extends Migration
             $table->timestamp('expires_at')->nullable();
             $table->timestamps();
         });
+
+        Schema::create('pedido_productos', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('pedidoid')->constrained('pedido')->onDelete('cascade');
+            $table->foreignId('productoid')->constrained('producto')->onDelete('cascade');
+            $table->integer('cantidad');
+            $table->timestamps();
+        });
+        
+        Schema::create('pedido', function (Blueprint $table) {
+            $table->id('pedidoid');
+            $table->foreignId('clienteid')->constrained('users')->onDelete('cascade'); // Relación con cliente
+            $table->date('pedido_fecha');
+            $table->decimal('pedido_total', 8, 2);
+            $table->boolean('pedido_por_confirmar')->default(true);
+            $table->timestamps();
+        });
+        
     }
 
     /**
