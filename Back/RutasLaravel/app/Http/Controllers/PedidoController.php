@@ -111,6 +111,7 @@ class PedidoController extends Controller
                 'package' => $pedidoProducto->producto->package,
                 'detail' => $pedidoProducto->producto->detail,
                 'sku' => $pedidoProducto->producto->sku,
+                'cost' => $pedidoProducto->producto->cost,
                 'image' => $pedidoProducto->producto->image,
                 'cantidad' => $pedidoProducto->cantidad,
                 'subtotal' => $pedidoProducto->producto->cost * $pedidoProducto->cantidad,
@@ -123,6 +124,37 @@ class PedidoController extends Controller
             'pedido' => $pedido,
             'productos' => $productos,
             'total' => $total,
+        ], 200);
+    }
+
+    public function confirmarPedido($clienteid)
+    {
+        // Buscar el pedido activo del cliente
+        $pedido = Pedido::where('clienteid', $clienteid)
+                        ->where('pedido_por_confirmar', true)
+                        ->first();
+
+        if (!$pedido) {
+            return response()->json(['message' => 'No hay un pedido activo para confirmar.'], 404);
+        }
+
+        // Cambiar el estado del pedido
+        $pedido->pedido_por_confirmar = false;
+        $pedido->save();
+
+        return response()->json(['message' => 'Pedido confirmado correctamente.'], 200);
+    }
+
+    public function obtenerConteoPedidos()
+    {
+        $pedidosTotales = Pedido::count();
+        $pedidosConfirmados = Pedido::where('pedido_por_confirmar', false)->count();
+        $pedidosPendientes = Pedido::where('pedido_por_confirmar', true)->count();
+
+        return response()->json([
+            'pedidosTotales' => $pedidosTotales,
+            'pedidosConfirmados' => $pedidosConfirmados,
+            'pedidosPendientes' => $pedidosPendientes,
         ], 200);
     }
 

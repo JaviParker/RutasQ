@@ -10,6 +10,7 @@ use App\Http\Controllers\ClientesController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PedidoController;
+use App\Http\Controllers\HistorialCompraController;
 
 
 use App\Http\Middleware\ApiAuthMiddleware;
@@ -103,7 +104,13 @@ Route::post('/notifications', [NotificationController::class, 'store']);
 //Carrito
 Route::post('/pedido/agregar-producto', [PedidoController::class, 'agregarProducto']);
 Route::get('/pedido/{clienteid}/ver-carrito', [PedidoController::class, 'verCarrito']);
+Route::put('/pedido/{clienteid}/confirmar', [PedidoController::class, 'confirmarPedido']);
+Route::get('/conteo-pedidos', [PedidoController::class, 'obtenerConteoPedidos']);
 
+//Historial
+Route::post('/historial-compra', [HistorialCompraController::class, 'registrarCompra']);
+Route::get('/ingresos-del-dia', [HistorialCompraController::class, 'obtenerIngresosDelDia']);
+Route::get('/ingresos-por-dia', [HistorialCompraController::class, 'obtenerIngresosPorDia']);
 
 
 

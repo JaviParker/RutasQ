@@ -6,6 +6,7 @@
         :key="product.id"
         :product="product"
         :initialQuantity="product.cantidad"
+        @update-quantity="updateQuantity"
         />
       </div>
       <!-- <ProductItemClient
@@ -21,7 +22,7 @@
         <div class="col-6">
             <strong>Pagar</strong> <br>
             <q-btn :to="{ name: 'clientPay' }" color="primary" label="Ahora" class="full-width btn"/>
-            <q-btn color="green" label="En entrega" class="full-width btn"/>
+            <q-btn color="green" label="En entrega" class="full-width btn" @click="registrarCompra"/>
         </div>
     </div>
   </template>
@@ -66,8 +67,59 @@
           console.error("Error al cargar el carrito:", error);
         }
       },
+      updateQuantity({ productId, quantity }) {
+        const productIndex = this.products.findIndex((item) => item.id === productId);
+
+        if (productIndex !== -1) {
+          if (quantity === 0) {
+            // Eliminar el producto del carrito
+            this.products.splice(productIndex, 1);
+          } else {
+            // Actualizar la cantidad localmente
+            this.products[productIndex].cantidad = quantity;
+          }
+
+          // Recalcular el total dinámicamente
+          this.total = this.products.reduce((acc, item) => acc + item.cantidad * item.cost, 0);
+        }
+      },
       handleAddToCart(item) {
         console.log("Producto agregado al carrito:", item);
+      },
+      async registrarCompra() {
+        try {
+          const productos = this.products.map(product => ({
+            id: product.id,
+            cantidad: product.cantidad,
+          }));
+
+          const payload = {
+            productos,
+            total: this.total.toString(),
+          };
+
+          await api.post('/historial-compra', payload);
+
+          // Cambiar el estado del pedido a no confirmado
+          await api.put(`/pedido/${this.clienteId}/confirmar`);
+
+          // Limpiar carrito local y recargar
+          this.products = [];
+          this.total = 0;
+
+          this.$q.notify({
+            type: 'positive',
+            message: 'Compra registrada y carrito actualizado',
+          });
+
+          this.$router.push({ name: 'clientHome' });
+        } catch (error) {
+          console.error("Error al registrar la compra:", error);
+          this.$q.notify({
+            type: 'negative',
+            message: 'Error al procesar la compra',
+          });
+        }
       },
     },
   };

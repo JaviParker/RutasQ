@@ -10,35 +10,51 @@
         <!-- Totales -->
         <div class="status-column">
           <div class="status-title">Totales</div>
-          <div class="status-quantity">{{ totalOrders }}</div>
+          <div class="status-quantity">{{ pedidosTotales }}</div>
         </div>
   
         <!-- Confirmados -->
         <div class="status-column">
           <div class="status-title">Confirmados</div>
-          <div class="status-quantity">{{ confirmedOrders }}</div>
+          <div class="status-quantity">{{ pedidosConfirmados }}</div>
         </div>
   
         <!-- Pendientes -->
         <div class="status-column">
           <div class="status-title">Pendientes</div>
-          <div class="status-quantity">{{ pendingOrders }}</div>
+          <div class="status-quantity">{{ pedidosPendientes }}</div>
         </div>
       </div>
     </div>
   </template>
   
   <script>
+import { api } from 'src/boot/axios';
+
   export default {
     name: 'OrderStatus',
     data() {
       return {
-        // Aquí defines las cantidades
-        totalOrders: 100,
-        confirmedOrders: 75,
-        pendingOrders: 25
+        pedidosTotales: 0,
+        pedidosConfirmados: 0,
+        pedidosPendientes: 0,
       };
-    }
+    },
+    methods: {
+      async obtenerConteoPedidos() {
+        try {
+          const response = await api.get('/conteo-pedidos');
+          this.pedidosTotales = response.data.pedidosTotales || 0;
+          this.pedidosConfirmados = response.data.pedidosConfirmados || 0;
+          this.pedidosPendientes = response.data.pedidosPendientes || 0;
+        } catch (error) {
+          console.error("Error al obtener conteo de pedidos:", error);
+        }
+      },
+    },
+    mounted() {
+      this.obtenerConteoPedidos(); // Llama al método al montar
+    },
   };
   </script>
   

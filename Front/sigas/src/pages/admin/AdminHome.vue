@@ -2,10 +2,10 @@
     <div class="page-container">
         <div class="income">
             <strong>Ingresos del dia</strong>
-            <b>$13500.00</b>
+            <b>${{ ingresosDia.toFixed(2) }}</b>
         </div>
         <OrdersCount/>
-        <IncomeHistory/>
+        <IncomeHistory :ingresosPorDia="ingresosPorDia"/>
       <div class="btn">
         <q-btn :to="{ name: 'adminInventory' }" rounded padding="20px 30px" color="secondary" label="Revisar inventario" class="full-width"/>
       </div>
@@ -16,6 +16,7 @@
   </template>
   
   <script>
+  import { api } from 'src/boot/axios';
   import IncomeHistory from 'src/components/IncomeHistory.vue';
   import OrdersCount from 'src/components/OrdersCount.vue';
   
@@ -26,13 +27,34 @@
     },
     data() {
       return {
-        //Datos
+        ingresosDia: 0,
+        ingresosPorDia: [],
       };
     },
     methods: {
       handleAddToCart(item) {
         console.log("Producto agregado al carrito:", item);
       },
+      async obtenerIngresosDia() {
+        try {
+          const response = await api.get('/ingresos-del-dia');
+          this.ingresosDia = response.data.totalIngresos || 0;
+        } catch (error) {
+          console.error("Error al obtener ingresos del día:", error);
+        }
+      },
+      async obtenerIngresosPorDia() {
+        try {
+          const response = await api.get('/ingresos-por-dia');
+          this.ingresosPorDia = response.data;
+        } catch (error) {
+          console.error("Error al obtener ingresos por día:", error);
+        }
+      },
+    },
+    mounted() {
+      this.obtenerIngresosDia(); // Cargar datos al montar el componente
+      this.obtenerIngresosPorDia();
     },
   };
   </script>
