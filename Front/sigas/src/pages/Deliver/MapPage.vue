@@ -8,6 +8,7 @@
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css'; // Importar los estilos de Leaflet
 
+
 export default {
   name: 'MapPage',
   mounted() {
@@ -15,6 +16,7 @@ export default {
   },
   methods: {
     initMap() {
+
       const map = L.map('map').setView([23.8773, -104.2456], 12);
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -44,3 +46,4 @@ export default {
   height: 100%;
 }
 </style>
+
