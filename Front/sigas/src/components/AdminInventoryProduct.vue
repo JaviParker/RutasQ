@@ -30,10 +30,10 @@
           </div>
           <div class="row">
             <div class="col-6 counts">
-              <q-btn class="btn" color="primary" label="Editar" :to="{ name: 'adminProducts' }" @click="onClick" />
+              <q-btn class="btn" color="primary" label="Editar" :to="{ name: 'adminProducts' }" @click="emitEdit" />
             </div>
             <div class="col-6 counts">
-              <q-btn class="btn" color="negative" label="Eliminar" @click="onClick" />
+              <q-btn class="btn" color="negative" label="Eliminar" @click="emitDelete" />
             </div>
           </div>
         </div>
@@ -43,6 +43,8 @@
   
   
   <script>
+import { api } from 'src/boot/axios';
+
 export default {
   name: "ProductItemClient",
   props: {
@@ -83,6 +85,13 @@ export default {
         quantity: this.quantity,
       });
     },
+    emitEdit() {
+      this.$emit('edit-product', this.product);
+    },
+    emitDelete() {
+      console.log("Evento emitido con ID:", this.product.id); // Debugging
+      this.$emit("delete-product", this.product.id);
+    }
   },
 };
 </script>
