@@ -111,6 +111,8 @@ Route::get('/conteo-pedidos', [PedidoController::class, 'obtenerConteoPedidos'])
 Route::post('/historial-compra', [HistorialCompraController::class, 'registrarCompra']);
 Route::get('/ingresos-del-dia', [HistorialCompraController::class, 'obtenerIngresosDelDia']);
 Route::get('/ingresos-por-dia', [HistorialCompraController::class, 'obtenerIngresosPorDia']);
+Route::get('/estadisticas-semanales', [HistorialCompraController::class, 'obtenerEstadisticasSemanales']);
+Route::get('/meses', [HistorialCompraController::class, 'obtenerMes']);
 
 
 

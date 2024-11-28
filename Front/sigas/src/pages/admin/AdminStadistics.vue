@@ -15,6 +15,7 @@
 </template>
 
 <script>
+import { api } from 'src/boot/axios';
 import MonthlySummaryCard from 'src/components/MonthlySummaryCard.vue';
 import { ref } from 'vue'
 
@@ -24,48 +25,60 @@ export default {
     },
     data() {
         return {
-            weeks: [
-                {
-                    id: 1,
-                    number: 1,
-                    income: 13500.00,
-                    topProducts: [
-                        'Jabon Foca',
-                        'Sopa Yemina',
-                        'Coca cola 1.5L'
-                    ]
-                },
-                {
-                    id: 2,
-                    number: 2,
-                    income: 11000.00,
-                    topProducts: [
-                        'Jabon Foca',
-                        'Sopa Yemina',
-                        'Coca cola 1.5L'
-                    ]
-                },
-                {
-                    id: 3,
-                    number: 3,
-                    income: 12600.00,
-                    topProducts: [
-                        'Jabon Foca',
-                        'Sopa Yemina',
-                        'Coca cola 1.5L'
-                    ]
-                }            
-            ]
+            weeks: [],
+            options: [],
         }
     },
     setup () {
-    return {
-        model: ref(null),
-        options: [
-        'Enero','Febrero', 'Marzo', 'Abril', 'Mayo','Junio', 'Julio', 'Agosto', 'Septiembre','Octubre', 'Noviembre', 'Diciembre'
-        ]
-    }
-    }
+        return {
+            model: ref('Noviembre'),
+            // options: [
+            //     // 'Enero',
+            //     // 'Febrero',
+            //     // 'Marzo',
+            //     // 'Abril',
+            //     // 'Mayo',
+            //     // 'Junio',
+            //     // 'Julio',
+            //     // 'Agosto',
+            //     // 'Septiembre',
+            //     // 'Octubre',
+            //     // 'Noviembre',
+            //     // 'Diciembre',
+            // ]
+        }
+    },
+    mounted() {
+        this.obtenerEstadisticasSemanales();
+        this.obtenerMes();
+    },
+    methods: {
+        async obtenerEstadisticasSemanales() {
+        try {
+            const response = await api.get('/estadisticas-semanales');
+            const semanas = response.data.semanas.map((semana, index) => ({
+            id: index + 1,
+            number: semana.numeroSemana,
+            income: semana.totalIngresos,
+            topProducts: response.data.topProductos.map(p => p.nombre),
+            }));
+            this.weeks = semanas;
+            console.log(this.weeks);
+            
+            
+        } catch (error) {
+            console.error('Error al obtener estadísticas semanales:', error);
+        }
+        },
+        async obtenerMes() {
+        try {
+            const response = await api.get('/meses');
+            this.options = response.data;
+        } catch (error) {
+            console.error('Error al obtener meses:', error);
+        }
+        },
+    },
 }
 </script>
 
