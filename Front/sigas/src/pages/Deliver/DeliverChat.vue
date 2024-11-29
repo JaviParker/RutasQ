@@ -23,8 +23,12 @@
   </template>
   
   <script>
+import { api } from 'src/boot/axios';
 import DeliverMessage from 'src/components/DeliverMessage.vue';
+import { useAuthStore } from "stores/auth";
+import { computed } from "vue";
 
+const store = useAuthStore();
   
   export default {
     name: "DeliverChat",
@@ -34,38 +38,60 @@ import DeliverMessage from 'src/components/DeliverMessage.vue';
     data() {
       return {
         newMessage: "",
-        messages: [
-          {
-            profile_img: "https://via.placeholder.com/40", // Imágen de perfil ficticia
-            sender: "Usuario 1",
-            text: "Hola, ¿cómo estás?",
-            time: "10:00 AM",
-          },
-          {
-            profile_img: "https://via.placeholder.com/40",
-            sender: "Usuario 2",
-            text: "Todo bien, gracias. ¿Y tú?",
-            time: "10:01 AM",
-          },
-          {
-            profile_img: "https://via.placeholder.com/40",
-            sender: "Usuario 1",
-            text: "Estoy trabajando en un proyecto.",
-            time: "10:02 AM",
-          },
-        ],
+        messages: [],
+        updateInterval: null,
       };
     },
+    setup() {
+      const clienteId = computed(() => store.usuario?.usuarioid);
+      return {
+        clienteId,
+      };
+    },
+    mounted() {
+      this.fetchMessages();
+      this.startAutoUpdate();
+    },
+    beforeUnmount() {
+      this.stopAutoUpdate();
+    },
     methods: {
-      sendMessage() {
+      async fetchMessages() {
+        try {
+          const response = await api.get('/mensajes');
+          this.messages = response.data.map((msg) => ({
+            profile_img: "https://via.placeholder.com/40", // Aquí podrías usar imágenes reales si tienes
+            sender: msg.remitente, // Nombre del remitente
+            text: msg.mensaje,
+            time: `${msg.fecha} ${msg.hora}`,
+          }));
+          
+        } catch (error) {
+          console.error("Error al obtener mensajes:", error);
+        }
+      },
+      async sendMessage() {
         if (this.newMessage.trim()) {
-          this.messages.push({
-            profile_img: "https://via.placeholder.com/40", // Imágen de perfil del usuario
-            sender: "Yo",
-            text: this.newMessage,
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), // Hora actual
-          });
-          this.newMessage = ""; // Limpiar el campo de texto
+          try {
+            const payload = {
+              mensaje: this.newMessage,
+              remitente_id: this.clienteId, // Cambia esto por el ID del usuario actual
+            };
+            await api.post('/mensajes', payload);
+            this.newMessage = '';
+            this.fetchMessages(); // Recargar mensajes después de enviar
+          } catch (error) {
+            console.error("Error al enviar mensaje:", error);
+          }
+        }
+      },
+      startAutoUpdate() {
+        this.updateInterval = setInterval(this.fetchMessages, 10000); // Actualiza cada 10 segundos
+      },
+      stopAutoUpdate() {
+        if (this.updateInterval) {
+          clearInterval(this.updateInterval);
+          this.updateInterval = null;
         }
       },
     },

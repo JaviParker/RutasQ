@@ -11,6 +11,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PedidoController;
 use App\Http\Controllers\HistorialCompraController;
+use App\Http\Controllers\NotificacionRepartidorController;
 
 
 use App\Http\Middleware\ApiAuthMiddleware;
@@ -114,7 +115,9 @@ Route::get('/ingresos-por-dia', [HistorialCompraController::class, 'obtenerIngre
 Route::get('/estadisticas-semanales', [HistorialCompraController::class, 'obtenerEstadisticasSemanales']);
 Route::get('/meses', [HistorialCompraController::class, 'obtenerMes']);
 
-
+//Chat repartidores
+Route::get('/mensajes', [NotificacionRepartidorController::class, 'obtenerMensajes']);
+Route::post('/mensajes', [NotificacionRepartidorController::class, 'enviarMensaje']);
 
 
 
