@@ -149,7 +149,7 @@ class PedidoController extends Controller
     {
         // Buscar el pedido activo del cliente
         $pedido = Pedido::where('clienteid', $clienteid)
-                        ->where('pedido_por_confirmar', 1)
+                        ->where('pedido_por_confirmar', 2)
                         ->first();
 
         if (!$pedido) {
@@ -165,9 +165,10 @@ class PedidoController extends Controller
 
     public function obtenerConteoPedidos()
     {
-        $pedidosTotales = Pedido::count();
-        $pedidosConfirmados = Pedido::where('pedido_por_confirmar', false)->count();
-        $pedidosPendientes = Pedido::where('pedido_por_confirmar', true)->count();
+        // $pedidosTotales = Pedido::count();
+        $pedidosConfirmados = Pedido::where('pedido_por_confirmar', 0)->count();
+        $pedidosPendientes = Pedido::where('pedido_por_confirmar', 2)->count();
+        $pedidosTotales = $pedidosConfirmados + $pedidosPendientes;
 
         return response()->json([
             'pedidosTotales' => $pedidosTotales,
@@ -189,7 +190,8 @@ class PedidoController extends Controller
                         'location' => $pedido->tienda->direccion,
                         'owner' => $pedido->usuario->usuarionombre,
                         'paystatus' => $pedido->pedido_por_confirmar == 1 ? 'Pago pendiente' : 'Pagado',
-                        'image' => 'https://via.placeholder.com/100'
+                        'image' => 'https://via.placeholder.com/100',
+                        'userId' => $pedido->usuario->usuarioid
                     ];
                 });
 
@@ -201,6 +203,38 @@ class PedidoController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'Error al obtener los pedidos: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function getProductosDePedido($pedidoId)
+    {
+        try {
+            $pedido = Pedido::with('productos.producto')->findOrFail($pedidoId);
+
+            $productos = $pedido->productos->map(function ($pedidoProducto) {
+                return [
+                    'id' => $pedidoProducto->producto->id,
+                    'name' => $pedidoProducto->producto->name,
+                    'package' => $pedidoProducto->producto->package,
+                    'detail' => $pedidoProducto->producto->detail,
+                    'sku' => $pedidoProducto->producto->sku,
+                    'cost' => $pedidoProducto->producto->cost,
+                    'image' => $pedidoProducto->producto->image,
+                    'cantidad' => $pedidoProducto->cantidad,
+                    'subtotal' => $pedidoProducto->producto->cost * $pedidoProducto->cantidad,
+                ];
+            });
+
+            $total = $productos->sum('subtotal');
+
+            return response()->json([
+                'productos' => $productos,
+                'total' => $total,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error al obtener los productos del pedido: ' . $e->getMessage(),
             ], 500);
         }
     }

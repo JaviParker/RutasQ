@@ -21,7 +21,7 @@
   
         <!-- Sección del seleccionador de cantidad -->
         <div class="col-auto q-gutter-xs btn">
-          <q-btn color="primary" label="Detalles" class="full-width" clickable :to="{ name: 'orderDetails' }" />
+          <q-btn color="primary" label="Detalles" class="full-width" clickable @click="emitId" />
         </div>
       </div>
     </q-card>
@@ -42,6 +42,9 @@
       };
     },
     methods: {
+      emitId(){
+        this.$emit("orderid", [this.order.id, this.order.userId]);
+      },
       addToCart() {
         this.$emit("add-to-cart", {
           product: this.product,

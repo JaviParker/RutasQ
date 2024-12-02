@@ -14,7 +14,7 @@
             <b>${{ total }}</b>
         </div>
         <div class="col-6">
-            <q-btn color="secondary" label="Confirmar entrega" class="full-width btn"/> <br>
+            <q-btn color="green" label="Confirmar entrega" class="full-width btn" @click="confirmarPedido"/> <br>
             <q-btn color="red" label="No entregado" class="full-width btn"/>
         </div>
     </div>
@@ -22,63 +22,76 @@
   </template>
   
   <script>
-  import DeliverDetailsProduct from 'src/components/DeliverDetailsProduct.vue';
+  import { api } from 'src/boot/axios';
+import DeliverDetailsProduct from 'src/components/DeliverDetailsProduct.vue';
+import { useAuthStore } from 'src/stores/auth';
+import { computed } from 'vue';
   
+  const store = useAuthStore();
+
   export default {
     components: {
       DeliverDetailsProduct
     },
+    props: {
+      orderId: {
+        type: String,
+        required: true,
+      },
+      userId: {
+        type: String,
+        required: true,
+      },
+    },
+    setup() {
+      const clienteId = computed(() => store.usuario?.usuarioid);
+      return {
+        clienteId,
+      };
+    },
     data() {
       return {
-        products: [
-          {
-            id: 1,
-            name: "Jabón Foca 1kg",
-            package: "Caja de 6 unidades",
-            detail: "Detalle del producto",
-            sku: "123456",
-            cost: "115.00",
-            image: "https://via.placeholder.com/100",
-            ordered: 4,
-          },
-          {
-            id: 2,
-            name: "Jabón Roma 1kg",
-            package: "Caja de 6 unidades",
-            detail: "Otro detalle",
-            sku: "654321",
-            cost: "120.00",
-            image: "https://via.placeholder.com/100",
-            ordered: 2,
-          },
-          {
-            id: 2,
-            name: "Jabón FOCA 1kg",
-            package: "Caja de 6 unidades",
-            detail: "Otro detalle",
-            sku: "654321",
-            cost: "120.00",
-            image: "https://via.placeholder.com/100",
-            ordered: 6,
-          },
-          {
-            id: 2,
-            name: "Jabón Roma 1kg",
-            package: "Caja de 6 unidades",
-            detail: "Otro detalle",
-            sku: "654321",
-            cost: "120.00",
-            image: "https://via.placeholder.com/100",
-            ordered: 8,
-          },
-        ],
+        products: [],
         total: 87.00,
       };
+    },
+    mounted() {
+      this.fetchOrderDetails();
     },
     methods: {
       handleAddToCart(item) {
         console.log("Producto agregado al carrito:", item);
       },
+      async fetchOrderDetails() {
+        try {
+          const response = await api.get(`/pedidos/${this.orderId}/productos`);
+          const { productos, total } = response.data;
+          this.products = productos;
+          this.total = total;
+          console.log(response);
+
+        } catch (error) {
+          console.error('Error al obtener los detalles del pedido:', error);
+        }
+      },
+      async confirmarPedido(){
+        try {
+          
+          let response = await api.put(`/pedido/${this.userId}/confirmar`);
+          console.log(response);
+          this.$q.notify({
+            type: 'positive',
+            message: 'Entrega confirmada',
+          });
+
+          this.$router.push({ name: 'deliverHome' });
+        } catch (error) {
+          this.$q.notify({
+            type: 'negative',
+            message: 'Error al confirmar',
+          });
+        }
+      }
     },
   };
   </script>

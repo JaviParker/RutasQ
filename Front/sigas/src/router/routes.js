@@ -114,8 +114,9 @@ const routes = [
       },
       {
         name: "orderDetails",
-        path: "/orderDetails",
+        path: "/orderDetails/:orderId-:userId",
         component: () => import("src/pages/Deliver/DeliverOrderDetails.vue"),
+        props: true,
         meta: {
           administrador: true,
           consulta: true,
