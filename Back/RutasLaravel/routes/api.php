@@ -12,6 +12,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PedidoController;
 use App\Http\Controllers\HistorialCompraController;
 use App\Http\Controllers\NotificacionRepartidorController;
+use App\Http\Controllers\TiendaController;
 
 
 use App\Http\Middleware\ApiAuthMiddleware;
@@ -35,6 +36,8 @@ Route::get('/usuarios/listar/',[UserController::class,'listar'])->middleware(Api
 Route::post('/usuarios/crear/',[UserController::class,'crear'])->middleware(ApiAuthMiddleware::class);
 Route::post('/usuarios/login/',[UserController::class,'login']);
 Route::post('/usuarios/update/',[UserController::class,'update']);
+Route::post('/register-user', [UserController::class, 'registerUser']);
+Route::get('/get-user-id', [UserController::class, 'getUserIdByEmail']);
 
 //Route::put('/api/usuarios/update/','UserController@update')->middleware(ApiAuthMiddleware::class);
 //Route::post('/api/usuarios/upload/','UserController@upload')->middleware(ApiAuthMiddleware::class);
@@ -102,11 +105,13 @@ Route::delete('/products/{id}', [ProductController::class, 'destroy']);
 Route::get('/notifications', [NotificationController::class, 'index']);
 Route::post('/notifications', [NotificationController::class, 'store']);
 
-//Carrito
+//Carrito-pedidos
 Route::post('/pedido/agregar-producto', [PedidoController::class, 'agregarProducto']);
 Route::get('/pedido/{clienteid}/ver-carrito', [PedidoController::class, 'verCarrito']);
+Route::put('/pedido/{clienteid}/enviar', [PedidoController::class, 'enviarPedido']);
 Route::put('/pedido/{clienteid}/confirmar', [PedidoController::class, 'confirmarPedido']);
 Route::get('/conteo-pedidos', [PedidoController::class, 'obtenerConteoPedidos']);
+Route::get('/get-pedidos-con-tienda-info', [PedidoController::class, 'getPedidosConTiendaInfo']);
 
 //Historial
 Route::post('/historial-compra', [HistorialCompraController::class, 'registrarCompra']);
@@ -119,6 +124,8 @@ Route::get('/meses', [HistorialCompraController::class, 'obtenerMes']);
 Route::get('/mensajes', [NotificacionRepartidorController::class, 'obtenerMensajes']);
 Route::post('/mensajes', [NotificacionRepartidorController::class, 'enviarMensaje']);
 
+//Tienda
+Route::post('/register-tienda', [TiendaController::class, 'registerTienda']);
 
 
 

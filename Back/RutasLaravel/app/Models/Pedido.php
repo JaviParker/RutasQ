@@ -24,5 +24,16 @@ class Pedido extends Model
     {
         return $this->belongsTo(User::class, 'clienteid');
     }
+
+    public function tienda()
+    {
+        return $this->belongsTo(Tienda::class, 'clienteid', 'usuarioid');
+    }
+
+    public function usuario()
+    {
+        return $this->belongsTo(User::class, 'clienteid', 'usuarioid');
+    }
+
 }
 

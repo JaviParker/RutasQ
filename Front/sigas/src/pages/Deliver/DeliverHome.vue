@@ -8,13 +8,15 @@
         />
       </div>
       <div class="btn">
-        <q-btn color="secondary" label="Registrar cliente" class="full-width"/>
+        <q-btn color="secondary" label="Registrar cliente" class="full-width" @click="redirectToRegister"/>
       </div>
     </div>
   </template>
   
   <script>
-  import DeliverOrder from 'src/components/DeliverOrder.vue';
+  import { api } from 'src/boot/axios';
+import DeliverOrder from 'src/components/DeliverOrder.vue';
+import dataStore from '../admin/dataStore';
   
   export default {
     components: {
@@ -22,46 +24,38 @@
     },
     data() {
       return {
-        orders: [
-          {
-            id: 1,
-            shopname: "Abarrotes Jessi",
-            location: "Calle jardines #409 col. Independencia",
-            owner: "Luis Ramirez",
-            paystatus: "Pagado",
-            image: "https://via.placeholder.com/100",
-          },
-          {
-            id: 1,
-            shopname: "Miscelanea Pepe",
-            location: "Calle Torres #211 col. Benito Juarez",
-            owner: "Luis Ramirez",
-            paystatus: "Pagado",
-            image: "https://via.placeholder.com/100",
-          },
-          {
-            id: 1,
-            shopname: "Abarrotes Mari",
-            location: "Calle jardines #409",
-            owner: "Luis Ramirez",
-            paystatus: "Pagado",
-            image: "https://via.placeholder.com/100",
-          },
-          {
-            id: 1,
-            shopname: "Miscelanea El guero",
-            location: "Calle jardines #409",
-            owner: "Luis Ramirez",
-            paystatus: "Pagado",
-            image: "https://via.placeholder.com/100",
-          },
-          
-        ],
+        orders: [],
       };
+    },
+    mounted() {
+      this.fetchOrders();
     },
     methods: {
       handleAddToCart(item) {
         console.log("Producto agregado al carrito:", item);
+      },
+      redirectToRegister(){
+        dataStore.rolUploading = 'deliver';
+        this.$router.push({name: 'adminCheckUsers'});
+      },
+      async fetchOrders() {
+        try {
+          const response = await api.get('/get-pedidos-con-tienda-info');
+          if (response.data.status === 'success') {
+            this.orders = response.data.data;
+          } else {
+            this.$q.notify({
+              type: 'negative',
+              message: 'Error al cargar los pedidos',
+            });
+          }
+        } catch (error) {
+          console.error(error);
+          this.$q.notify({
+            type: 'negative',
+            message: 'Ocurrió un error al intentar cargar los pedidos.',
+          });
+        }
       },
     },
   };

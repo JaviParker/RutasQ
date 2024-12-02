@@ -101,7 +101,7 @@
           await api.post('/historial-compra', payload);
 
           // Cambiar el estado del pedido a no confirmado
-          await api.put(`/pedido/${this.clienteId}/confirmar`);
+          await api.put(`/pedido/${this.clienteId}/enviar`);
 
           // Limpiar carrito local y recargar
           this.products = [];

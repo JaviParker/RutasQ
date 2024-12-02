@@ -10,7 +10,7 @@
         <q-btn :to="{ name: 'adminInventory' }" rounded padding="20px 30px" color="secondary" label="Revisar inventario" class="full-width"/>
       </div>
       <div class="btn">
-        <q-btn :to="{ name: 'adminCheckUsers' }" rounded padding="20px 30px" color="grey" label="Registrar cliente" class="full-width"/>
+        <q-btn @click="redirectToRegister" rounded padding="20px 30px" color="grey" label="Registrar cliente" class="full-width"/>
       </div>
     </div>
   </template>
@@ -19,6 +19,7 @@
   import { api } from 'src/boot/axios';
   import IncomeHistory from 'src/components/IncomeHistory.vue';
   import OrdersCount from 'src/components/OrdersCount.vue';
+import dataStore from './dataStore';
   
   export default {
     components: {
@@ -51,6 +52,10 @@
           console.error("Error al obtener ingresos por día:", error);
         }
       },
+      redirectToRegister(){
+        dataStore.rolUploading = 'admin';
+        this.$router.push({name: 'adminCheckUsers'});
+      }
     },
     mounted() {
       this.obtenerIngresosDia(); // Cargar datos al montar el componente

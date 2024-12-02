@@ -127,11 +127,11 @@ class PedidoController extends Controller
         ], 200);
     }
 
-    public function confirmarPedido($clienteid)
+    public function enviarPedido($clienteid)
     {
         // Buscar el pedido activo del cliente
         $pedido = Pedido::where('clienteid', $clienteid)
-                        ->where('pedido_por_confirmar', true)
+                        ->where('pedido_por_confirmar', 1)
                         ->first();
 
         if (!$pedido) {
@@ -139,7 +139,25 @@ class PedidoController extends Controller
         }
 
         // Cambiar el estado del pedido
-        $pedido->pedido_por_confirmar = false;
+        $pedido->pedido_por_confirmar = 2;
+        $pedido->save();
+
+        return response()->json(['message' => 'Pedido confirmado correctamente.'], 200);
+    }
+
+    public function confirmarPedido($clienteid)
+    {
+        // Buscar el pedido activo del cliente
+        $pedido = Pedido::where('clienteid', $clienteid)
+                        ->where('pedido_por_confirmar', 1)
+                        ->first();
+
+        if (!$pedido) {
+            return response()->json(['message' => 'No hay un pedido activo para confirmar.'], 404);
+        }
+
+        // Cambiar el estado del pedido
+        $pedido->pedido_por_confirmar = 0;
         $pedido->save();
 
         return response()->json(['message' => 'Pedido confirmado correctamente.'], 200);
@@ -156,6 +174,35 @@ class PedidoController extends Controller
             'pedidosConfirmados' => $pedidosConfirmados,
             'pedidosPendientes' => $pedidosPendientes,
         ], 200);
+    }
+
+    public function getPedidosConTiendaInfo()
+    {
+        try {
+            $pedidos = Pedido::with(['tienda', 'usuario'])
+                ->where('pedido_por_confirmar', 2)
+                ->get()
+                ->map(function ($pedido) {
+                    return [
+                        'id' => $pedido->pedidoid,
+                        'shopname' => $pedido->tienda->nombre,
+                        'location' => $pedido->tienda->direccion,
+                        'owner' => $pedido->usuario->usuarionombre,
+                        'paystatus' => $pedido->pedido_por_confirmar == 1 ? 'Pago pendiente' : 'Pagado',
+                        'image' => 'https://via.placeholder.com/100'
+                    ];
+                });
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $pedidos,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Error al obtener los pedidos: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 
 }
