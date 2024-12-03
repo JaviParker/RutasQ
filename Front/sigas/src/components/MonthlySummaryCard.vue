@@ -2,7 +2,7 @@
     <div class="summary-card">
       <!-- Título de la semana -->
       <div class="summary-title">
-        Semana {{ number }}
+        Semana {{ number }} ({{ days }} días resumidos)
       </div>
   
       <!-- Ingresos brutos -->
@@ -29,7 +29,7 @@
     props: {
       number: {
         type: String,
-        default: "Semana 1"
+        default: "1"
       },
       income: {
         type: String,
@@ -38,6 +38,10 @@
       topProducts: {
         type: Array,
         default: () => []
+      },
+      days: {
+        type: Number,
+        default: 1
       }
     }
   };

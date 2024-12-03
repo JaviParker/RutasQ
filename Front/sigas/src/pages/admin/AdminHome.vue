@@ -90,6 +90,10 @@ import dataStore from './dataStore';
     margin: 20px auto; /* Centra la cuadrícula horizontalmente */
   }
 
+  .btn{
+    margin-bottom: 20px;
+  }
+
   @media (max-width: 768px) {
     .products-grid {
       grid-template-columns: 1fr; /* En pantallas pequeñas, se muestran como lista */

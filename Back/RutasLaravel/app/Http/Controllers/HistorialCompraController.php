@@ -63,21 +63,27 @@ class HistorialCompraController extends Controller
         return response()->json($ingresos, 200);
     }
 
-    public function obtenerEstadisticasSemanales()
+    public function obtenerEstadisticasSemanales(Request $request)
     {
-        $historial = HistorialCompra::orderBy('año', 'desc')
-            ->orderBy('mes', 'desc')
+        $mesSeleccionado = $request->query('mes', Carbon::now()->format('m'));
+        $historial = HistorialCompra::where('mes', $mesSeleccionado)
+            ->orderBy('año', 'desc')
             ->orderBy('diaNumero', 'desc')
             ->get();
 
+        if ($historial->isEmpty()) {
+            \Log::info("No hay registros para el mes seleccionado: {$mesSeleccionado}");
+        }
+
         $semanas = [];
         $semanaActual = [];
+        $diasSemana = [];
         $inicioSemana = null;
         $totalIngresosSemana = 0;
 
         foreach ($historial as $registro) {
             // Crear una fecha ficticia para facilitar cálculos
-            $fechaRegistro = \Carbon\Carbon::create($registro->año, $registro->mes, $registro->diaNumero);
+            $fechaRegistro = Carbon::create($registro->año, $registro->mes, $registro->diaNumero);
 
             // Si es el primer registro, inicializar la semana
             if (is_null($inicioSemana)) {
@@ -89,15 +95,18 @@ class HistorialCompraController extends Controller
                 $semanas[] = [
                     'numeroSemana' => count($semanas) + 1,
                     'totalIngresos' => $totalIngresosSemana,
+                    'diasAnalizados' => count($diasSemana),
                 ];
                 $inicioSemana = $fechaRegistro;
                 $totalIngresosSemana = 0;
                 $semanaActual = [];
+                $diasSemana = [];
             }
 
             // Sumar ingresos y agregar al registro de la semana actual
             $totalIngresosSemana += $registro->total;
             $semanaActual[] = $registro;
+            $diasSemana[$fechaRegistro->toDateString()] = true;
         }
 
         // Agregar la última semana procesada si no está vacía
@@ -105,7 +114,12 @@ class HistorialCompraController extends Controller
             $semanas[] = [
                 'numeroSemana' => count($semanas) + 1,
                 'totalIngresos' => $totalIngresosSemana,
+                'diasAnalizados' => count($diasSemana),
             ];
+        }
+
+        if (empty($semanas)) {
+            \Log::warning("No se generaron semanas para el mes: {$mesSeleccionado}");
         }
 
         // Obtener los productos más vendidos (misma lógica)
@@ -122,14 +136,14 @@ class HistorialCompraController extends Controller
 
         $productos = Product::whereIn('id', $topProductos->pluck('productoid'))->get();
         $topProductos = $topProductos->map(function ($producto) use ($productos) {
-            $producto->nombre = $productos->where('id', $producto->productoid)->first()->nombre ?? 'Producto desconocido';
+            $producto->name = $productos->where('id', $producto->productoid)->first()->name ?? 'Producto desconocido';
             return $producto;
         });
 
         return response()->json([
             'semanas' => $semanas,
             'topProductos' => $topProductos,
-        ], 200);
+        ]);
     }
 
     public function obtenerMes()
