@@ -77,8 +77,30 @@ import { computed } from 'vue';
       async confirmarPedido(){
         try {
           
-          let response = await api.put(`/pedido/${this.userId}/confirmar`);
+          // let response = await api.put(`/pedido/${this.userId}/confirmar`);
+          // console.log(response);
+          
+          const formData = {
+            puntos: 10
+          }
+          const usuario = store.usuario;
+          const response = await api.post('/usuarios/update', {
+            usuarioid: usuario.usuarioid,
+            usuarionombre: usuario.usuarionombre,
+            usuariomail: usuario.usuariomail,
+            usuario: usuario.usuario,
+            usuariopassword: usuario.usuariopassword,
+            rolid: usuario.rolid,
+            sucursalid: usuario.sucursalid,
+            puntos: usuario.puntos
+          });
           console.log(response);
+          
+          // const p1 = await api.put(`/usuarios/${this.userId}/puntos`, formData, {headers: {
+          //       'Content-Type': 'application/json',
+          //   }});
+          console.log(p1);
+          
           this.$q.notify({
             type: 'positive',
             message: 'Entrega confirmada',

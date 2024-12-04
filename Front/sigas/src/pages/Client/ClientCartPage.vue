@@ -103,10 +103,21 @@
             total: this.total.toString(),
           };
 
-          await api.post('/historial-compra', payload);
+          // await api.post('/historial-compra', payload);
 
           // Cambiar el estado del pedido a no confirmado
-          await api.put(`/pedido/${this.clienteId}/enviar`);
+          // await api.put(`/pedido/${this.clienteId}/enviar`);
+
+          // Actualizar los puntos del usuario
+    const response = await api.put(
+      `/usuarios/${this.clienteId}/puntos`,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    console.log(response.data);
 
           // Limpiar carrito local y recargar
           this.products = [];

@@ -1,5 +1,5 @@
 <template>
-    <q-card flat class="q-pa-md q-mb-md notification">
+    <q-card flat :class="offer.puntos <= puntos ? 'q-pa-md q-mb-md notification' : 'q-pa-md q-mb-md notification disabled-card'" >
       <div class="row">
         <!-- Primera columna: imagen e información -->
         <div class="col">
@@ -28,7 +28,7 @@
           </div>
           
           <div class="row q-mt-sm">
-            <div class="col puntos">
+            <div :class="offer.puntos > puntos ? 'col no' : 'col yes'">
               Puntos necesarios para oferta: <strong>{{ offer.puntos }}</strong>
             </div>
           </div>
@@ -61,13 +61,26 @@
         type: Object,
         required: true,
       },
+      puntos: {
+        type: Number,
+        default: 0
+      }
     },
     data() {
       return {
         quantity: 1, // Cantidad inicial
+        usuarioPuntos: 0,
       };
     },
+    mounted(){
+      this.getPoints;
+    },
     methods: {
+      async getPoints(){
+        const response = await api.get(`/usuarios/${store.usuario.usuarioid}/puntos`);
+        this.usuarioPuntos = response.data.puntos;
+        console.log(this.usuarioPuntos);
+      },
       increaseQuantity() {
         this.quantity++;
       },
@@ -206,11 +219,18 @@
     width: auto;
   }
 
-  .puntos{
-    color: #001D6C;
+  .yes{
+    color: #49aa1c;
+  }
+  .no{
+    color: rgb(199, 38, 38);
   }
   .puntos strong{
     font-weight: bold;
   }
+
+  .disabled-card{
+    pointer-events: none; /* Prevenir interacción */
+    opacity: 0.5; /* Opcional: hacer que la tarjeta se vea deshabilitada */ }
   </style>
   

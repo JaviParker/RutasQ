@@ -60,6 +60,7 @@ export default {
           clienteid: this.clienteId,
           productoid: product.id,
           cantidad: quantity,  // Usa quantity aquí
+          descuento: 0
         }
       );
       this.$q.notify({

@@ -15,6 +15,7 @@ use App\Http\Controllers\NotificacionRepartidorController;
 use App\Http\Controllers\TiendaController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProblemController;
+use App\Http\Controllers\PuntoController;
 
 
 use App\Http\Middleware\ApiAuthMiddleware;
@@ -40,6 +41,9 @@ Route::post('/usuarios/login/',[UserController::class,'login']);
 Route::post('/usuarios/update/',[UserController::class,'update']);
 Route::post('/register-user', [UserController::class, 'registerUser']);
 Route::get('/get-user-id', [UserController::class, 'getUserIdByEmail']);
+Route::get('usuarios/{usuarioid}/puntos', [UserController::class, 'obtenerPuntos']);
+Route::put('usuarios/{usuarioid}/puntos', [UserController::class, 'actualizarPuntos']);
+
 
 //Route::put('/api/usuarios/update/','UserController@update')->middleware(ApiAuthMiddleware::class);
 //Route::post('/api/usuarios/upload/','UserController@upload')->middleware(ApiAuthMiddleware::class);
@@ -137,7 +141,6 @@ Route::post('/register-tienda', [TiendaController::class, 'registerTienda']);
 Route::get('/problems', [ProblemController::class, 'index']);
 Route::post('/problems', [ProblemController::class, 'store']);
 Route::put('/problems/{id}', [ProblemController::class, 'update']);
-
 
 
 

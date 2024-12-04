@@ -121,17 +121,24 @@
           </q-item>
         </q-list>
 
-        <q-list v-if="tipoUsuario === 4">
+        <!-- <q-list v-if="tipoUsuario === 4">
           <q-item clickable v-ripple :to="{ name: 'clientNotifications' }" @click="changeTitle('Notificaciones y ofertas')">
             <q-item-section avatar><q-icon color="primary" name="notifications"></q-icon></q-item-section>
             <q-item-section>Notificaciones y ofertas</q-item-section>
           </q-item>
-        </q-list>
+        </q-list> -->
 
         <q-list v-if="tipoUsuario === 4">
           <q-item clickable v-ripple :to="{ name: 'addProblem' }" @click="changeTitle('Crear incidencia')">
             <q-item-section avatar><q-icon color="primary" name="feedback"></q-icon></q-item-section>
             <q-item-section>Crear incidencia</q-item-section>
+          </q-item>
+        </q-list>
+
+        <q-list v-if="tipoUsuario === 4">
+          <q-item clickable v-ripple :to="{ name: 'clientNotifications' }" @click="changeTitle('Crear incidencia')">
+            <q-item-section avatar><q-icon color="primary" name="notifications"></q-icon></q-item-section>
+            <q-item-section>Ofertas/Marketing</q-item-section>
           </q-item>
         </q-list>
 
