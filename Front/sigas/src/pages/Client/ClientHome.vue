@@ -62,8 +62,11 @@ export default {
           cantidad: quantity,  // Usa quantity aquí
         }
       );
-
-      console.log("Producto agregado al pedido exitosamente:", response.data);
+      this.$q.notify({
+        type: "positive",
+        message: "Agregado al carrito",
+      });
+      // console.log("Producto agregado al pedido exitosamente:", response.data);
     } catch (error) {
       console.error("Error al agregar producto al pedido:", error);
     }

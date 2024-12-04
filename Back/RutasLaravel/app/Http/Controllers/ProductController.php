@@ -97,26 +97,42 @@ class ProductController extends Controller
     
 
     public function destroy($id)
-{
-    try {
-        $product = Product::findOrFail($id);
-        $product->delete();
+    {
+        try {
+            $product = Product::findOrFail($id);
+            $product->delete();
 
-        \Log::info("Producto eliminado correctamente: ID {$id}");
+            \Log::info("Producto eliminado correctamente: ID {$id}");
 
-        return response()->json([
-            'message' => 'Producto eliminado correctamente',
-            'id' => $id
-        ], 200);
-    } catch (\Exception $e) {
-        \Log::error("Error al eliminar el producto: {$e->getMessage()}");
+            return response()->json([
+                'message' => 'Producto eliminado correctamente',
+                'id' => $id
+            ], 200);
+        } catch (\Exception $e) {
+            \Log::error("Error al eliminar el producto: {$e->getMessage()}");
 
-        return response()->json([
-            'message' => 'Error al eliminar el producto',
-            'error' => $e->getMessage()
-        ], 500);
+            return response()->json([
+                'message' => 'Error al eliminar el producto',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
-}
 
+    public function obtenerIdPorNombre(Request $request)
+{
+    // Validar la solicitud
+    $validatedData = $request->validate([
+        'nombre' => 'required|string|max:255',
+    ]);
+
+    // Buscar el producto por su nombre
+    $producto = Product::where('name', $validatedData['nombre'])->first();
+
+    if (!$producto) {
+        return response()->json(['message' => 'Producto no encontrado'], 404);
+    }
+
+    return response()->json(['productoid' => $producto->id, 'precio' => $producto->cost], 200);
+}
 
 }

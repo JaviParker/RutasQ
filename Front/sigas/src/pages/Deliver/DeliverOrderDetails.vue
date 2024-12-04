@@ -65,9 +65,9 @@ import { computed } from 'vue';
       async fetchOrderDetails() {
         try {
           const response = await api.get(`/pedidos/${this.orderId}/productos`);
-          const { productos, total } = response.data;
+          const { productos, total, descuento } = response.data;
           this.products = productos;
-          this.total = total;
+          this.total = total  - (descuento || 0);
           console.log(response);
 
         } catch (error) {

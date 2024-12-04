@@ -22,7 +22,8 @@ class Notification extends Model
         'precio', 
         'tipo_oferta_aviso', 
         'descripcion', 
-        'imagen'
+        'imagen',
+        'puntos'
     ];
 
     public $timestamps = false;

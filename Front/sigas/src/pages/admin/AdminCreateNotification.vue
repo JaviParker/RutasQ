@@ -29,7 +29,7 @@
   
         <!-- Input para seleccionar productos -->
         <div class="row q-mb-md">
-          <q-input v-model="productosSeleccionados" label="Seleccionar productos" outlined readonly>
+          <q-input v-model="productosSeleccionados" :label= "selectedProductsText == '' ? 'Seleccionar productos' : selectedProductsText" outlined readonly>
             <template v-slot:append>
               <q-btn flat icon="search" @click="card = true" />
             </template>
@@ -69,7 +69,8 @@
         </q-dialog>
 
         <!-- Input para la descripción -->
-        <q-input v-model="descripcion" label="Descripción" type="textarea" outlined />
+        <q-input v-model="descripcion" label="Descripción" type="textarea" outlined class="q-mb-md"/>
+        <q-input v-model="puntos" label="Puntos necesarios para oferta" outlined class="q-mb-md"/>
   
         <!-- Botón para enviar oferta/aviso -->
         <q-btn label="Enviar oferta" color="primary" class="q-mt-md" @click="enviarFormulario" />
@@ -99,12 +100,14 @@
     data() {
       return {
         nombre: '', // Nombre del producto
-        productosSeleccionados: '', // Productos seleccionados
-        descripcion: '', // Descripción de la oferta o aviso
+        productosSeleccionados: [], // Productos seleccionados
+        descripcion: '',
+        puntos: '',
         precio: '', // Precio del producto
         imagenSeleccionada: null, // Imagen seleccionada en el q-uploader
         Products: [],
         selectedProducts: [],
+        selectedProductsText : '',
       };
     },
     mounted() {
@@ -117,16 +120,17 @@
           imagen: this.imagenSeleccionada ? URL.createObjectURL(this.imagenSeleccionada) : '', // Asignar la imagen seleccionada
           tipo_oferta_aviso: this.group,
           nombre: this.nombre,
-          productos_seleccionados: this.productosSeleccionados,
+          productos_seleccionados: this.selectedProductsText,
           descripcion: this.descripcion,
-          precio: this.precio
+          precio: this.precio,
+          puntos: this.puntos
         };
       },
-      selectedProductsText() {
-        return this.productosSeleccionados
-          .map((product) => `${product.nombre} / ${product.cantidad} unidades`)
-          .join(' + ');
-      }
+      // selectedProductsText() {
+      //   return this.productosSeleccionados
+      //     .map((product) => `${product.name} / ${product.quantity} unidades`)
+      //     .join(' + ');
+      // }
     },
     methods: {
       // Abre el dialogo para seleccionar productos
@@ -151,14 +155,13 @@
         formData.append('remitente_id', 0); // Remitente predeterminado
         formData.append('destinatario_id', 0); // Destinatario predeterminado
         formData.append('tipo_notificacion', this.group);
-        formData.append('productos_seleccionados', this.productosSeleccionados);
+        formData.append('productos_seleccionados', this.selectedProductsText);
         formData.append('precio', this.precio);
         formData.append('tipo_oferta_aviso', this.group);
         formData.append('descripcion', this.descripcion);
+        formData.append('puntos', this.puntos);
+        formData.append('imagen', "https://via.placeholder.com/100");  // Subir la imagen
         
-        if (this.imagenSeleccionada) {
-          formData.append('imagen', this.imagenSeleccionada);  // Subir la imagen
-        }
 
         // Enviar la solicitud POST a la API
         const response = await api.post('/notifications', formData, {
@@ -177,6 +180,7 @@
           });
           // Resetear el formulario después del envío exitoso
           this.resetFormulario();
+          this.$router.push({name: 'adminHome'})
         }
       } catch (error) {
         console.error(error);
@@ -208,8 +212,15 @@
     },
     // Agrega el producto seleccionado a la lista de productos seleccionados
     handleAddToSelectedProducts(product) {
+      console.log(product);
+      let productText = product.quantity + "-" + product.product.name
       if (!this.selectedProducts.includes(product)) {
         this.selectedProducts.push(product);
+      }
+      if(this.selectedProductsText == ''){
+        this.selectedProductsText += productText;
+      }else{
+        this.selectedProductsText += " + " + productText;
       }
     },
     // Guarda los productos seleccionados y cierra el dialog

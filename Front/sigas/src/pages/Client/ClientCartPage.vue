@@ -18,6 +18,8 @@
         <div class="col-6">
             <strong>Total</strong> <br>
             <b>${{ this.total }}</b>
+            <p class="q-mt-lg">Descuento aplicado</p>
+            <p class="q-mt-xs">Ahorraste ${{  this.descuento  }}</p>
         </div>
         <div class="col-6">
             <strong>Pagar</strong> <br>
@@ -42,6 +44,7 @@
     data() {
       return {
         products: [],
+        descuento: 0,
       };
     },
     setup() {
@@ -60,7 +63,9 @@
           this.products = response.data.productos;
           console.log(this.products);
           
-          this.total = response.data.total;
+          this.descuento = response.data.pedido.descuento || 0;
+          
+          this.total = response.data.total - this.descuento;
           console.log(this.total);
           
         } catch (error) {

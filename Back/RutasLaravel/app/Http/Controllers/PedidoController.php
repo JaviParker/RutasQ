@@ -18,6 +18,7 @@ class PedidoController extends Controller
             'productoid' => 'required|exists:products,id',
             'cantidad' => 'required|integer|min:1',
             'clienteid' => 'required|exists:users,usuarioid', // Verificar que el clienteid exista en la tabla de usuarios
+            'descuento' => 'nullable'
         ]);
 
         // Obtener el producto y calcular el subtotal
@@ -35,6 +36,7 @@ class PedidoController extends Controller
                 'pedido_fecha' => Carbon::now(),
                 'pedido_total' => 0,
                 'pedido_por_confirmar' => true,
+                'descuento' => $validatedData['descuento'],
             ]
         );
 
@@ -189,7 +191,7 @@ class PedidoController extends Controller
                         'shopname' => $pedido->tienda->nombre,
                         'location' => $pedido->tienda->direccion,
                         'owner' => $pedido->usuario->usuarionombre,
-                        'paystatus' => $pedido->pedido_por_confirmar == 1 ? 'Pago pendiente' : 'Pagado',
+                        'paystatus' => $pedido->pedido_por_confirmar == 2 ? 'Pago pendiente' : 'Pagado',
                         'image' => 'https://via.placeholder.com/100',
                         'userId' => $pedido->usuario->usuarioid
                     ];
@@ -231,6 +233,7 @@ class PedidoController extends Controller
             return response()->json([
                 'productos' => $productos,
                 'total' => $total,
+                'descuento' => $pedido->descuento,
             ]);
         } catch (\Exception $e) {
             return response()->json([
