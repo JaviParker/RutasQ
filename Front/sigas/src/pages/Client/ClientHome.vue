@@ -1,7 +1,9 @@
 <template>
   <div class="page-container">
     <div class="carousel-container">
-      <CategoryCarousel />
+      <CategoryCarousel 
+        :categories="categories"
+      />
     </div>
     <div class="products-grid">
       <ProductItemClient
@@ -31,10 +33,12 @@ export default {
   data() {
     return {
       products: [],
+      categories: [],
     };
   },
   mounted() {
     this.fetchProducts(); // Llama a la función cuando el componente se monta
+    this.fetchCategories();
   },
   setup() {
     const clienteId = computed(() => store.usuario?.usuarioid);
@@ -72,13 +76,21 @@ export default {
 
         // Asignar los productos recibidos al array products
         this.products = response.data;
-        console.log(this.products);
-        console.log(this.clienteId);
         
       } catch (error) {
         console.error("Error al obtener productos:", error);
       }
     },
+    async fetchCategories(){
+      try {
+        const response = await api.get("/categories");
+        console.log(response);
+        this.categories = response.data;
+      } catch (error) {
+        console.log(error);
+                
+      }
+    }
   },
 };
 </script>

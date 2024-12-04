@@ -40,10 +40,40 @@
         outlined
         class="q-mb-md"
       />
-      <q-input v-model="precio" label="Precio" outlined class="q-mb-md" />
-      <q-input v-model="cantidad" label="Cantidad" outlined class="q-mb-md" />
-
-      <!-- Botón para enviar oferta/aviso -->
+      <q-input
+        v-model="precio"
+        label="Precio"
+        outlined class="q-mb-md"
+      />
+      <q-input
+        v-model="cantidad"
+        label="Cantidad"
+        outlined class="q-mb-md"
+      />
+      <!-- Select para categorías -->
+      <q-select
+        v-model="selectedCategory"
+        :options="categories"
+        label="Categoría"
+        outlined
+        class="q-mb-md"
+        @update:model-value="checkNewCategory(selectedCategory)"
+      />
+      <q-btn
+        v-if="creatingCategory"
+        flat
+        label="Cancelar creación"
+        color="negative"
+        class="q-ml-md"
+        @click="cancelNewCategory"
+      />
+      <q-input
+        v-if="creatingCategory"
+        v-model="newCategory"
+        label="Nueva categoría"
+        outlined
+        class="q-mb-md"
+      />
       <q-btn
         @click="enviarFormulario"
         label="Guardar producto"
@@ -78,12 +108,17 @@ export default {
       sku: "",
       precio: "",
       cantidad: "",
+      category: "",
       imagenSeleccionada: null, // Imagen seleccionada en el q-uploader
       originalData: {},
+      categories: [], // Categorías existentes
+      selectedCategory: null, // Categoría seleccionada
+      creatingCategory: false, // Bandera para creación de categoría
+      newCategory: "", // Nueva categoría
     };
   },
   mounted() {
-    console.log(dataStore.method);
+    this.loadCategories();
     if(dataStore.method == 'put'){
       const product = dataStore.selectedProduct;
       
@@ -95,6 +130,8 @@ export default {
         this.sku = product.sku || '';
         this.precio = product.cost || '';
         this.cantidad = product.quantity || '';
+        this.category = product.category || '';
+        this.selectedCategory = product.category;
 
         this.originalData = {
           name: this.nombre,
@@ -103,6 +140,7 @@ export default {
           sku: this.sku,
           cost: this.precio,
           quantity: this.cantidad,
+          category: this.category,
         };
       }else{
         console.log('No se encontró un producto seleccionado');
@@ -115,8 +153,48 @@ export default {
     handleImageUpload(files) {
       this.imagenSeleccionada = files[0];
     },
+    async loadCategories() {
+      try {
+        const response = await api.get("/categories");
+        
+        const uniqueCategories = [
+          ...new Set(response.data.map((category) => category.category)),
+        ];
+        this.categories = [...uniqueCategories, "Nueva categoría"];
+      } catch (error) {
+        console.error("Error al cargar categorías:", error);
+      }
+    },
+    checkNewCategory(value) {
+      if (value === "Nueva categoría") {
+        this.creatingCategory = true;
+        this.selectedCategory = null;
+      }else{
+        this.creatingCategory = false;
+        this.newCategory = "";
+      }
+    },
+    cancelNewCategory() {
+      this.creatingCategory = false;
+      this.newCategory = "";
+    },
+
     // Función para enviar el formulario (lógica pendiente)
     async enviarFormulario() {
+      let categoryToSubmit = this.creatingCategory ? this.newCategory : this.selectedCategory;
+      console.log(categoryToSubmit);
+      console.log(this.newCategory);
+      console.log(this.selectedCategory);
+      
+      
+      if (!categoryToSubmit) {
+        this.$q.notify({
+          message: "Selecciona o crea una categoría.",
+          color: "red",
+        });
+        return;
+      }
+
       if (
         !this.nombre ||
         !this.unidad ||
@@ -131,15 +209,6 @@ export default {
         });
         return;
       }
-      console.log({
-        id: this.id,
-      nombre: this.nombre,
-      unidad: this.unidad,
-      detalle: this.detalle,
-      sku: this.sku,
-      precio: this.precio,
-      cantidad: this.cantidad,
-    });
       
     const formData = {
       name: this.nombre,
@@ -148,23 +217,18 @@ export default {
       sku: this.sku,
       cost: this.precio,
       quantity: this.cantidad,
-      image: this.imagenSeleccionada
+      image: "https://via.placeholder.com/100",
+      category: categoryToSubmit,
   };
 
 
       try {
-        console.log(this.cantidad);
-        console.log(this.id);
-        
-        // let response;
-
         if (dataStore.method == "put") {
-          const response = await api.put(`http://localhost:8090/api/products/${this.id}`, formData, {
+          const response = await api.put(`/products/${this.id}`, formData, {
             headers: {
                 'Content-Type': 'application/json',
             }
           });
-          console.log(response);
         } else if (dataStore.method == "post") {
 
           let formData = new FormData();
@@ -174,9 +238,14 @@ export default {
           formData.append("sku", this.sku);
           formData.append("cost", this.precio);
           formData.append("quantity", this.cantidad);
-          formData.append("image", this.imagenSeleccionada);
+          formData.append("image", "https://via.placeholder.com/100");
+          formData.append("category", this.categoryToSubmit);
+          // if(this.creatingCategory == true){
+          //   formData.append("category", this.newCategory);
+          // }else if(this.creatingCategory == false){
+          //   formData.append("category", this.selectedCategory);
+          // }
           const response = await api.post('/products', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
-          console.log(response);
           console.log('post realizado');
         }
           

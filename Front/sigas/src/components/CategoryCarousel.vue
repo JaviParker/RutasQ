@@ -3,13 +3,13 @@
       <div class="categories-container">
         <div 
           class="category-slide" 
-          v-for="(category, index) in categories" 
-          :key="index"
+          v-for="(category) in categories" 
+          :key="category"
         >
           <div class="category-item">
             <!-- Imagen en círculo -->
             <q-img
-              :src="category.image"
+              :src="url"
               class="category-image"
               :ratio="1"
               contain
@@ -17,7 +17,7 @@
             />
             <!-- Nombre de la categoría -->
             <div class="category-name">
-              {{ category.name }}
+              {{ category.category }}
             </div>
           </div>
         </div>
@@ -28,15 +28,14 @@
   <script>
   export default {
     name: 'CategoryCarousel',
+    props:{
+      categories:{
+        type: Object,
+      }
+    },
     data() {
       return {
-        categories: [
-          { name: 'Cocina', image: 'https://via.placeholder.com/150' },
-          { name: 'Limpieza', image: 'https://via.placeholder.com/150' },
-          { name: 'Bebidas', image: 'https://via.placeholder.com/150' },
-          { name: 'Lacteos', image: 'https://via.placeholder.com/150' },
-          { name: 'Frituras', image: 'https://via.placeholder.com/150' }
-        ]
+        url: "https://via.placeholder.com/150",
       };
     },
     created() {

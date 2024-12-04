@@ -13,6 +13,7 @@ use App\Http\Controllers\PedidoController;
 use App\Http\Controllers\HistorialCompraController;
 use App\Http\Controllers\NotificacionRepartidorController;
 use App\Http\Controllers\TiendaController;
+use App\Http\Controllers\CategoryController;
 
 
 use App\Http\Middleware\ApiAuthMiddleware;
@@ -100,6 +101,8 @@ Route::post('/products', [ProductController::class, 'store']);
 Route::put('/products/{id}', [ProductController::class, 'update']);
 Route::delete('/products/{id}', [ProductController::class, 'destroy']);
 
+//Categorias
+Route::get('/categories', [CategoryController::class, 'index']);
 
 //Notificaciones
 Route::get('/notifications', [NotificationController::class, 'index']);

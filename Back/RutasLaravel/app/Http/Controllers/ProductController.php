@@ -27,6 +27,7 @@ class ProductController extends Controller
             'cost' => 'required|string|max:100',
             'quantity' => 'required|string|max:100',
             'image' => 'nullable',
+            'category' => 'required'
         ]);
 
         // Crear el producto
@@ -54,7 +55,8 @@ class ProductController extends Controller
             'sku' => 'nullable|integer|min:0',
             'cost' => 'nullable|numeric|min:0',
             'quantity' => 'nullable|integer|min:0',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'image' => 'nullable',
+            'category' => 'required'
         ]);
     
         try {
@@ -62,7 +64,7 @@ class ProductController extends Controller
             $product = Product::findOrFail($id);
     
             // Actualiza los campos si están presentes en la solicitud
-            foreach (['name', 'package', 'detail', 'sku', 'cost', 'quantity'] as $field) {
+            foreach (['name', 'package', 'detail', 'sku', 'cost', 'quantity', 'category'] as $field) {
                 if ($request->filled($field)) {
                     $product->$field = $request->input($field);
                 }
