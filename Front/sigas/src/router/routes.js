@@ -257,6 +257,28 @@ const routes = [
         },
       },
       {
+        name: "adminProblems",
+        path: "/adminProblems",
+        component: () => import("src/pages/admin/AdminProblems.vue"),
+        meta: {
+          administrador: true,
+          consulta: true,
+          captura: true,
+          supervisor: true,
+        },
+      },
+      {
+        name: "addProblem",
+        path: "/AddProblem",
+        component: () => import("src/pages/Client/AddProblem.vue"),
+        meta: {
+          administrador: true,
+          consulta: true,
+          captura: true,
+          supervisor: true,
+        },
+      },
+      {
         name: "rol",
         path: "/rol",
         component: () => import("pages/RolPage.vue"),

@@ -14,6 +14,7 @@ use App\Http\Controllers\HistorialCompraController;
 use App\Http\Controllers\NotificacionRepartidorController;
 use App\Http\Controllers\TiendaController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ProblemController;
 
 
 use App\Http\Middleware\ApiAuthMiddleware;
@@ -131,6 +132,10 @@ Route::post('/mensajes', [NotificacionRepartidorController::class, 'enviarMensaj
 //Tienda
 Route::post('/register-tienda', [TiendaController::class, 'registerTienda']);
 
+//Incidencias
+Route::get('/problems', [ProblemController::class, 'index']);
+Route::post('/problems', [ProblemController::class, 'store']);
+Route::put('/problems/{id}', [ProblemController::class, 'update']);
 
 
 

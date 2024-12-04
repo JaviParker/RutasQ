@@ -63,6 +63,13 @@
             </q-item>
           </q-list>
 
+          <q-list v-if="tipoUsuario === 1">
+            <q-item clickable v-ripple :to="{ name: 'adminProblems' }" @click="changeTitle('Incidencias')">
+              <q-item-section avatar><q-icon color="primary" name="feedback"></q-icon></q-item-section>
+              <q-item-section>Incidencias</q-item-section>
+            </q-item>
+          </q-list>
+
         <q-expansion-item v-if="tipoUsuario === 1" icon="settings" label="Parametros">
           <q-list>
             <q-item clickable v-ripple :to="{ name: 'usuario' }" @click="changeTitle('Usuarios')">
@@ -121,6 +128,13 @@
           </q-item>
         </q-list>
 
+        <q-list v-if="tipoUsuario === 4">
+          <q-item clickable v-ripple :to="{ name: 'addProblem' }" @click="changeTitle('Crear incidencia')">
+            <q-item-section avatar><q-icon color="primary" name="feedback"></q-icon></q-item-section>
+            <q-item-section>Crear incidencia</q-item-section>
+          </q-item>
+        </q-list>
+
         <q-list v-if="tipoUsuario === 5">
           <q-item clickable v-ripple :to="{ name: 'deliverHome' }" @click="changeTitle('Pedidos')">
             <q-item-section avatar><q-icon color="primary" name="local_shipping"></q-icon></q-item-section>
@@ -146,6 +160,13 @@
           <q-item clickable v-ripple :to="{ name: 'deliverChat' }" @click="changeTitle('Chat')">
             <q-item-section avatar><q-icon color="primary" name="chat"></q-icon></q-item-section>
             <q-item-section>Chat</q-item-section>
+          </q-item>
+        </q-list>
+        
+        <q-list v-if="tipoUsuario === 5">
+          <q-item clickable v-ripple :to="{ name: 'addProblem' }" @click="changeTitle('Crear incidencia')">
+            <q-item-section avatar><q-icon color="primary" name="feedback"></q-icon></q-item-section>
+            <q-item-section>Crear incidencia</q-item-section>
           </q-item>
         </q-list>
       </q-list>
