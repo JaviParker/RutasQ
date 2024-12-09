@@ -77,8 +77,7 @@ import { computed } from 'vue';
       async confirmarPedido(){
         try {
           
-          // let response = await api.put(`/pedido/${this.userId}/confirmar`);
-          // console.log(response);
+          let response2 = await api.put(`/pedido/${this.userId}/confirmar`);
           
           const formData = {
             puntos: 10
@@ -94,12 +93,10 @@ import { computed } from 'vue';
             sucursalid: usuario.sucursalid,
             puntos: usuario.puntos
           });
-          console.log(response);
           
           // const p1 = await api.put(`/usuarios/${this.userId}/puntos`, formData, {headers: {
           //       'Content-Type': 'application/json',
           //   }});
-          console.log(p1);
           
           this.$q.notify({
             type: 'positive',
