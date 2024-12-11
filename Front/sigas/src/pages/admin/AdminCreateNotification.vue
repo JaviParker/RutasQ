@@ -73,7 +73,7 @@
         <q-input v-model="puntos" label="Puntos necesarios para oferta" outlined class="q-mb-md"/>
   
         <!-- Botón para enviar oferta/aviso -->
-        <q-btn label="Enviar oferta" color="primary" class="q-mt-md" @click="enviarFormulario" />
+        <q-btn label="Enviar" color="primary" class="q-mt-md" @click="enviarFormulario" />
       </q-form>
   
       <!-- Apartado de Vista Previa -->

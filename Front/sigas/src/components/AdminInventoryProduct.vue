@@ -61,10 +61,10 @@ export default {
   },
   computed: {
     quantityClass() {
-      if (this.product.quantity === 0) {
+      if (this.product.quantity == 0) {
         return "danger"; // Clase para cantidad igual a 0
-      } else if (this.product.quantity <= 4) {
-        return "warning"; // Clase para cantidad menor o igual a 4
+      } else if (this.product.quantity <= this.product.min_quantity) {
+        return "warning";
       } else {
         return ""; // Sin clase adicional si no cumple ninguna condición
       }
@@ -150,7 +150,7 @@ export default {
 /* Clase danger para cantidad 0 */
 .danger {
   background-color: red;
-  color: white;
+  color: white; 
 }
 </style>
 

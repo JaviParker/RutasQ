@@ -74,6 +74,11 @@
         outlined
         class="q-mb-md"
       />
+      <q-input
+        v-model="min_quantity"
+        label="Cantidad minima(Alerta al llegar a esta cantidad)"
+        outlined class="q-mb-md"
+      />
       <q-btn
         @click="enviarFormulario"
         label="Guardar producto"
@@ -115,6 +120,7 @@ export default {
       selectedCategory: null, // Categoría seleccionada
       creatingCategory: false, // Bandera para creación de categoría
       newCategory: "", // Nueva categoría
+      min_quantity: 1,
     };
   },
   mounted() {
@@ -132,6 +138,7 @@ export default {
         this.cantidad = product.quantity || '';
         this.category = product.category || '';
         this.selectedCategory = product.category;
+        this.min_quantity = product.min_quantity;
 
         this.originalData = {
           name: this.nombre,
@@ -141,6 +148,7 @@ export default {
           cost: this.precio,
           quantity: this.cantidad,
           category: this.category,
+          min_quantity: this.min_quantity,
         };
       }else{
         console.log('No se encontró un producto seleccionado');
@@ -201,7 +209,9 @@ export default {
         !this.detalle ||
         !this.sku ||
         !this.precio ||
-        !this.cantidad
+        !this.cantidad ||
+        !this.min_quantity
+                
       ) {
         this.$q.notify({
           message: "Por favor, completa todos los campos.",
@@ -219,6 +229,7 @@ export default {
       quantity: this.cantidad,
       image: "https://via.placeholder.com/100",
       category: categoryToSubmit,
+      min_quantity: this.min_quantity,
   };
 
 
@@ -240,6 +251,7 @@ export default {
           formData.append("quantity", this.cantidad);
           formData.append("image", "https://via.placeholder.com/100");
           formData.append("category", this.categoryToSubmit);
+          formData.append("min_quantity", this.min_quantity);
           // if(this.creatingCategory == true){
           //   formData.append("category", this.newCategory);
           // }else if(this.creatingCategory == false){
@@ -273,6 +285,7 @@ export default {
       this.precio = '';
       this.cantidad = '';
       this.imagenSeleccionada = null;
+      this.min_quantity = 0;
       dataStore.selectedProduct = null;
     },
   },
