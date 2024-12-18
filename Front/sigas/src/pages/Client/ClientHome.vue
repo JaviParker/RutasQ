@@ -22,8 +22,10 @@ import ProductItemClient from "../../components/ProductItemClient.vue";
 import { useAuthStore } from "stores/auth";
 import { computed } from "vue";
 import { api } from "../../boot/axios";
+import { useCartStore } from "src/stores/cart";
 
 const store = useAuthStore();
+const cartStore = useCartStore();
 
 export default {
   components: {
@@ -39,6 +41,7 @@ export default {
   mounted() {
     this.fetchProducts(); // Llama a la función cuando el componente se monta
     this.fetchCategories();
+    this.fetchCartTotal(this.clienteId);
   },
   setup() {
     const clienteId = computed(() => store.usuario?.usuarioid);
@@ -88,11 +91,24 @@ export default {
     async fetchCategories(){
       try {
         const response = await api.get("/categories");
-        console.log(response);
         this.categories = response.data;
       } catch (error) {
         console.log(error);
                 
+      }
+    },
+    async fetchCartTotal(clienteId){
+      try {
+        const response = await api.get(`/totalEnCarrito/${clienteId}`);
+        console.log(response);
+        
+        const totalEnCarrito = response.data.total;
+        // console.log(totalEnCarrito);
+        
+        cartStore.setCartCount(totalEnCarrito); // Actualizamos en el store de carrito
+        
+      } catch (error) {
+        // console.error("Error al cargar el total del carrito:", error);
       }
     }
   },

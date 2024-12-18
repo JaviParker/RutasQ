@@ -15,7 +15,9 @@
         <q-toolbar-title>{{ nameG }}</q-toolbar-title>
 
         <q-btn v-if="tipoUsuario === 4" clickable :to="{ name: 'clientNotifications' }" flat round dense icon="notifications" @click="changeTitle('Notificaciones')"></q-btn>
-        <q-btn v-if="tipoUsuario === 4" clickable :to="{ name: 'clientCart' }" flat round dense icon="shopping_cart" @click="changeTitle('Carrito')"></q-btn>
+        <q-btn v-if="tipoUsuario === 4" clickable :to="{ name: 'clientCart' }" flat round dense icon="shopping_cart" @click="changeTitle('Carrito')">
+          <q-badge v-if="badgeCount > 0" color="red" floating>{{ badgeCount }}</q-badge>
+        </q-btn>
         <q-btn v-if="tipoUsuario === 4" clickable :to="{ name: 'clientHome' }" flat round dense icon="home" @click="changeTitle('Inicio')"></q-btn>
         
         <q-btn v-if="tipoUsuario === 5" clickable :to="{ name: 'deliverChat' }" flat round dense icon="chat" @click="changeTitle('Chat de repartidores')"></q-btn>
@@ -188,20 +190,73 @@
 <script setup>
 import { ref, computed, watch, onMounted } from "vue";
 import { useAuthStore } from "stores/auth";
+import { useCartStore } from "src/stores/cart";
 import { useRouter, useRoute } from "vue-router";
+import { api } from "src/boot/axios";
 
-const store = useAuthStore();
+// Stores
+const authStore = useAuthStore();
+const cartStore = useCartStore();
+
+// Vue Router
 const router = useRouter();
-const nameG = ref("Inicio");
 const route = useRoute();
 
-const isLoginPage = computed(() => route.name === 'login');
-const logueado = computed(() => store.usuario);
+// Reactive data
+const nameG = ref("Inicio");
+const leftDrawerOpen = ref(false);
+const isLoginPage = computed(() => route.name === "login");
+const logueado = computed(() => authStore.usuario);
 
-// Variable para el tipo de usuario actual
-const tipoUsuario = computed(() => store.usuario?.rolid);
+// Computed values
+const tipoUsuario = computed(() => authStore.usuario?.rolid);
+const clienteId = computed(() => authStore.usuario?.usuarioid);
+const badgeCount = computed(() => cartStore.cartItemCount);
 
-// Verificar si el rol está correctamente cargado al montar el componente
+// Functions
+const changeTitle = (title) => {
+  nameG.value = title;
+};
+
+const toggleLeftDrawer = () => {
+  leftDrawerOpen.value = !leftDrawerOpen.value;
+};
+
+const salir = async () => {
+  authStore.$reset();
+  router.push({ name: "login" });
+  leftDrawerOpen.value = false;
+};
+
+const fetchCartTotal = async (clienteId) => {
+  try {
+    const response = await api.get(`/totalEnCarrito/${clienteId}`);
+    console.log(response);
+    
+    const totalEnCarrito = response.data.total;
+    // console.log(totalEnCarrito);
+    
+    cartStore.setCartCount(totalEnCarrito); // Actualizamos en el store de carrito
+    
+  } catch (error) {
+    console.error("Error al cargar el total del carrito:", error);
+  }
+};
+
+// Watchers
+watch(
+  () => authStore.usuario,
+  (newVal) => {
+    if (newVal) {
+      console.log("Cambio detectado en store.usuario:", newVal);
+      console.log("Rol de usuario:", newVal.rolid);
+    } else {
+      console.error("Error: Usuario no encontrado en store.");
+    }
+  }
+);
+
+// Lifecycle hooks
 onMounted(() => {
   if (tipoUsuario.value === 1) {
     nameG.value = "Administrador";
@@ -210,34 +265,14 @@ onMounted(() => {
   } else if (tipoUsuario.value === 5) {
     nameG.value = "Repartidor";
   }
-});
-
-// Monitorea los cambios en `store.usuario` y actualiza `tipoUsuario` cuando cambie
-watch(() => store.usuario, (newVal) => {
-  console.log("Cambio detectado en store.usuario:", newVal);
-  if (!newVal) {
-    console.error("Error: Usuario no encontrado en store.");
-  } else {
-    console.log("Rol de usuario:", newVal.tipo_usuario);
+  
+  // Cargar el total del carrito al montar el componente
+  if (clienteId.value) {
+    fetchCartTotal(clienteId.value);
   }
 });
-
-const changeTitle = (title) => {
-  nameG.value = title; // Cambiar el título
-};
-
-const leftDrawerOpen = ref(false);
-
-function toggleLeftDrawer() {
-  leftDrawerOpen.value = !leftDrawerOpen.value;
-}
-
-async function salir() {
-  store.$reset();
-  router.push({ name: "login" });
-  leftDrawerOpen.value = false;
-}
 </script>
+
 
 <style scoped>
 header {

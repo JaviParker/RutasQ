@@ -34,8 +34,10 @@
   import { api } from "../../boot/axios";
   import { useAuthStore } from "stores/auth";
   import { computed } from "vue";
+  import { useCartStore } from 'src/stores/cart';
 
   const store = useAuthStore();
+  const cartStore = useCartStore();
 
   export default {
     components: {
@@ -61,24 +63,30 @@
         try {
           const response = await api.get(`/pedido/${this.clienteId}/ver-carrito`);
           this.products = response.data.productos;
-          console.log(this.products);
           
           this.descuento = response.data.pedido.descuento || 0;
           
           this.total = response.data.total - this.descuento;
-          console.log(this.total);
           
         } catch (error) {
-          console.error("Error al cargar el carrito:", error);
+          console.log("Carrito vacio");
         }
       },
-      updateQuantity({ productId, quantity }) {
+      async updateQuantity({ productId, quantity }) {
         const productIndex = this.products.findIndex((item) => item.id === productId);
 
         if (productIndex !== -1) {
           if (quantity === 0) {
             // Eliminar el producto del carrito
             this.products.splice(productIndex, 1);
+            const pre_id = await api.get(`/totalEnCarrito/${this.clienteId}`);
+            const pedidoId = pre_id.data.pedidoid;
+            const response = await api.post('/eliminar-producto', {
+              pedidoid: pedidoId,
+              productoid: productId,
+            });
+            this.fetchCartTotal(this.clienteId);
+            
           } else {
             // Actualizar la cantidad localmente
             this.products[productIndex].cantidad = quantity;
@@ -86,6 +94,17 @@
 
           // Recalcular el total dinámicamente
           this.total = this.products.reduce((acc, item) => acc + item.cantidad * item.cost, 0);
+        }
+      },
+      async fetchCartTotal(clienteId){
+        try {
+          const response = await api.get(`/totalEnCarrito/${clienteId}`);
+          
+          const totalEnCarrito = response.data.total;
+          cartStore.setCartCount(totalEnCarrito);
+          
+        } catch (error) {
+          // console.error("Error al cargar el total del carrito:", error);
         }
       },
       handleAddToCart(item) {
@@ -109,16 +128,16 @@
           await api.put(`/pedido/${this.clienteId}/enviar`);
 
           // Actualizar los puntos del usuario
-    const response = await api.put(
-      `/usuarios/${this.clienteId}/puntos`,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    );
-    console.log(response.data);
+          const response = await api.put(
+            `/usuarios/${this.clienteId}/puntos`,
+            {
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            }
+          );
 
+          cartStore.setCartCount(0);
           // Limpiar carrito local y recargar
           this.products = [];
           this.total = 0;
@@ -127,7 +146,7 @@
             type: 'positive',
             message: 'Compra registrada y carrito actualizado',
           });
-
+          
           this.$router.push({ name: 'clientHome' });
         } catch (error) {
           console.error("Error al registrar la compra:", error);

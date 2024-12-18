@@ -33,6 +33,8 @@
   </template>
   
   <script>
+import { useCartStore } from 'src/stores/cart';
+
   export default {
     name: "ProductItemClient",
     props: {
@@ -60,6 +62,8 @@
           product: this.product,
           quantity: this.quantity,
         });
+        const cartStore = useCartStore();
+        cartStore.incrementCart(1);
       },
     },
   };

@@ -122,6 +122,9 @@ Route::put('/pedido/{clienteid}/confirmar', [PedidoController::class, 'confirmar
 Route::get('/conteo-pedidos', [PedidoController::class, 'obtenerConteoPedidos']);
 Route::get('/get-pedidos-con-tienda-info', [PedidoController::class, 'getPedidosConTiendaInfo']);
 Route::get('/pedidos/{pedidoId}/productos', [PedidoController::class, 'getProductosDePedido']);
+Route::get('/totalEnCarrito/{clienteid}', [PedidoController::class, 'getCartProductsCount']);
+Route::post('/eliminar-producto', [PedidoController::class, 'eliminarProducto']);
+
 
 //Historial
 Route::post('/historial-compra', [HistorialCompraController::class, 'registrarCompra']);

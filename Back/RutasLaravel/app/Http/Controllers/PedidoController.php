@@ -65,36 +65,6 @@ class PedidoController extends Controller
         return response()->json(['message' => 'Producto agregado al carrito', 'pedido' => $pedido], 200);
     }
 
-    // public function verCarrito($clienteid)
-    // {
-    //     // Buscar el pedido activo del usuario
-    //     $pedido = Pedido::where('clienteid', $clienteid)
-    //                     ->where('pedido_por_confirmar', true)
-    //                     ->with('productos.producto') // Cargar los productos y sus detalles
-    //                     ->first();
-
-    //     if (!$pedido) {
-    //         return response()->json(['message' => 'No hay un carrito activo para este usuario.'], 404);
-    //     }
-
-    //     // Calcular el total de productos y devolver el pedido con sus productos
-    //     return response()->json([
-    //         'pedido' => $pedido,
-    //         'productos' => $pedido->productos->map(function ($pedidoProducto) {
-    //             return [
-    //                 'id' => $pedidoProducto->producto->id,
-    //                 'name' => $pedidoProducto->producto->name, // Asegúrate de que el nombre del producto esté definido
-    //                 'package' => $pedidoProducto->producto->package, // Si tienes algún campo de paquete
-    //                 'detail' => $pedidoProducto->producto->detail, // Campo de detalle
-    //                 'sku' => $pedidoProducto->producto->sku,
-    //                 'image' => $pedidoProducto->producto->image, // Ajusta el nombre según tu base de datos
-    //                 'cantidad' => $pedidoProducto->cantidad,
-    //                 'subtotal' => $pedidoProducto->producto->cost * $pedidoProducto->cantidad,
-    //             ];
-    //         }),
-    //         'total' => $pedido->pedido_total,
-    //     ], 200);
-    // }
     public function verCarrito($clienteid)
     {
         $pedido = Pedido::where('clienteid', $clienteid)
@@ -103,7 +73,7 @@ class PedidoController extends Controller
                         ->first();
 
         if (!$pedido) {
-            return response()->json(['message' => 'No hay un carrito activo para este usuario.'], 404);
+            return response()->json(['message' => 'No hay un carrito activo para este usuario.']);
         }
 
         $productos = $pedido->productos->map(function ($pedidoProducto) {
@@ -240,6 +210,49 @@ class PedidoController extends Controller
                 'message' => 'Error al obtener los productos del pedido: ' . $e->getMessage(),
             ], 500);
         }
+    }
+
+    public function getCartProductsCount($clienteid)
+    {
+        $pedido = Pedido::where('clienteid', $clienteid)
+                        ->where('pedido_por_confirmar', 1)
+                        ->first();
+        $pedidoId = $pedido->pedidoid;  
+        
+        $productsCount = PedidoProducto::where('pedidoid',$pedidoId)
+                                        ->count();
+
+        return response()->json([
+            'total' => $productsCount,
+            'pedidoid' => $pedidoId
+        ], 200);
+    }
+
+    public function eliminarProducto(Request $request)
+    {
+        $validatedData = $request->validate([
+            'pedidoid' => 'required',
+            'productoid' => 'required',
+        ]);
+
+        $pedidoProducto = PedidoProducto::where('pedidoid', $validatedData['pedidoid'])
+                                        ->where('productoid', $validatedData['productoid'])
+                                        ->first();
+
+        if (!$pedidoProducto) {
+            return response()->json(['message' => 'El producto no está en el pedido.'], 404);
+        }
+
+        // Restar el subtotal del producto eliminado al total del pedido
+        $subtotal = $pedidoProducto->cantidad * $pedidoProducto->producto->precio;
+        $pedidoProducto->delete();
+
+        // Actualizar el total del pedido
+        $pedido = Pedido::find($validatedData['pedidoid']);
+        $pedido->pedido_total -= $subtotal;
+        $pedido->save();
+
+        return response()->json(['message' => 'Producto eliminado del pedido correctamente.'], 200);
     }
 
 }

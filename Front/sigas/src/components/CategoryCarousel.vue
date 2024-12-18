@@ -39,7 +39,7 @@
       };
     },
     created() {
-      console.log('Categories:', this.categories);
+      // console.log('Categories:', this.categories);
     }
   };
   </script>
