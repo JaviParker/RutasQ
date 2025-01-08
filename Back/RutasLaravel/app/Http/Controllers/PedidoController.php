@@ -163,7 +163,9 @@ class PedidoController extends Controller
                         'owner' => $pedido->usuario->usuarionombre,
                         'paystatus' => $pedido->pedido_por_confirmar == 2 ? 'Pago pendiente' : 'Pagado',
                         'image' => 'https://via.placeholder.com/100',
-                        'userId' => $pedido->usuario->usuarioid
+                        'userId' => $pedido->usuario->usuarioid,
+                        'lng' => $pedido->tienda->longitud,
+                        'lat' => $pedido->tienda->latitud
                     ];
                 });
 

@@ -41,6 +41,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-routing-machine';
 import 'leaflet-control-geocoder';
+import { api } from 'src/boot/axios';
 
 export default {
   name: 'MapPage',
@@ -56,15 +57,13 @@ export default {
       routeReady: false,
       navigationIndex: 0,
       waypoints: [],
-      manualCoordinates: [
-        [24.0423, -104.6576], // Coordenadas manuales dentro de Durango
-        [24.0376, -104.6353],
-        [24.0540, -104.5420],
-      ],
+      coords: [],
+      formattedCoords: [],
     };
   },
   mounted() {
     this.initMap();
+    this.fetchOrders();
   },
   methods: {
     initMap() {
@@ -75,20 +74,21 @@ export default {
       // L.control.zoom({ position: 'bottomright' }).addTo(this.map);
       // this.map.on('click', this.calculateOptimalRoute);
       this.getUserLocation();
-      this.calculateOptimalRoute();
     },
     async calculateOptimalRoute() {
       // if (!this.startLocation || this.manualCoordinates.length === 0) {
       //   alert("Por favor selecciona un punto de inicio y al menos un punto intermedio.");
       //   return;
       // }
-
+      const coords = JSON.parse(JSON.stringify(this.formattedCoords));
+      console.log(coords);
+      
       try {
         // Realizar la solicitud al backend
         const response = await fetch("http://127.0.0.1:5000/optimal_route", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ points: this.manualCoordinates }),
+          body: JSON.stringify({ points: coords }),
         });
 
         if (!response.ok) {
@@ -233,6 +233,34 @@ export default {
           console.error('Error al buscar la ubicación:', error);
         });
     },
+    async fetchOrders() {
+        try {
+          const response = await api.get('/get-pedidos-con-tienda-info');
+          if (response.data.status === 'success') {
+            // this.orders = response.data.data;
+            this.coords = response.data.data.map(order => [order.lat, order.lng]);
+            // console.log('Coordenadas cargadas:', this.coords);
+            this.formattedCoords = this.coords.map(coord => coord.map(Number));
+            // this.formattedCoords = [...new Set(this.coords.map(coord => coord.join(',')))].map(coord => coord.split(',').map(Number));
+            console.log(this.formattedCoords);
+            
+          } else {
+            this.$q.notify({
+              type: 'negative',
+              message: 'Error al cargar los pedidos',
+            });
+          }
+        } catch (error) {
+          console.error(error);
+          this.$q.notify({
+            type: 'negative',
+            message: 'Ocurrió un error al intentar cargar los pedidos.',
+          });
+        }
+
+        this.calculateOptimalRoute();
+
+      },
   },
 };
 </script>
