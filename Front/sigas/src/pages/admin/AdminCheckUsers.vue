@@ -39,8 +39,11 @@
             class="q-mb-md"
           />
           <q-select
+            v-if="isAdmin"
             v-model="user.rolid"
             :options="roles"
+            option-value="value"
+            option-label="label"
             label="Rol del Usuario"
             outlined
             required
@@ -48,14 +51,38 @@
           />
 
           <q-separator spaced />
-        <q-input v-model="shop.nombre" label="Nombre de la tienda" outlined class="q-mb-md" />
-        <q-input v-model="shop.direccion" label="Dirección" outlined class="q-mb-md" />
-        <q-input v-model="shop.latitud" label="Latitud" outlined class="q-mb-md" />
-        <q-input v-model="shop.longitud" label="Longitud" outlined class="q-mb-md" />
-        <q-input v-model="shop.telefono" label="Telefono" outlined class="q-mb-md" />
+          <div v-if="!isAdmin || user.rolid.value === 4">
+            <q-input v-model="shop.nombre" label="Nombre de la tienda" outlined class="q-mb-md" />
+            <q-input v-model="shop.direccion" label="Dirección" outlined class="q-mb-md" />
+            <q-input v-model="shop.telefono" label="Telefono" outlined class="q-mb-md" />
+            <div class="row q-mb-md">
+              <div class="col-12 col-sm-6 col-md-5 q-mb-sm">
+                <q-input
+                  v-model="shop.latitud"
+                  label="Latitud"
+                  outlined
+                  readonly
+                  class="q-mb-md coords"
+                />
+              </div>
+              <div class="col-12 col-sm-6 col-md-5 q-mb-sm">
+                <q-input
+                  v-model="shop.longitud"
+                  label="Longitud"
+                  outlined
+                  readonly
+                  class="q-mb-md coords"
+                />
+              </div>
+              <div class="col-auto">
+                <q-btn label="Obtener coordenadas" color="primary" @click="obtenerCoordenadas" />
+              </div>
+            </div>
+          </div>
+        
         
         <!-- Botón para enviar oferta/aviso -->
-        <q-btn label="Guardar datos" color="primary" class="q-mt-md" type="submit" />
+        <q-btn label="Guardar datos" color="primary" class="q-mt-md" type="submit" :disable="!validarFormulario"  />
       </q-form>
   
     </q-page>
@@ -63,8 +90,9 @@
   
   <script>
   import { api } from 'src/boot/axios';
-  import { ref } from 'vue'
-import dataStore from './dataStore';
+  import dataStore from './dataStore';
+  import { useAuthStore } from "stores/auth";
+  import { computed } from 'vue';
   
   export default {
     components: {
@@ -76,7 +104,7 @@ import dataStore from './dataStore';
           usuariomail: "",
           usuario: "",
           usuariopassword: "",
-          rolid: null,
+          rolid: "Administrador",
         },
         shop: {
           nombre: "",
@@ -91,6 +119,39 @@ import dataStore from './dataStore';
           { label: "Repartidor", value: 5 },
         ],
       };
+    },
+    setup() {
+      const authStore = useAuthStore();
+
+      // Obtener rol actual desde el store
+      const currentRole = computed(() => authStore.usuario?.rolid);
+      const isAdmin = computed(() => currentRole.value === 1);
+
+      return { currentRole, isAdmin };
+    },
+    computed: {
+      validarFormulario() {
+        // Validar datos de usuario
+        const usuarioCompleto =
+          this.user.usuarionombre &&
+          this.user.usuariomail &&
+          this.user.usuariopassword &&
+          this.user.rolid;
+
+        // Si el rol es "Tienda", validar también los datos de la tienda
+        if (this.user.rolid === 4) {
+          return (
+            usuarioCompleto &&
+            this.shop.nombre &&
+            this.shop.direccion &&
+            this.shop.telefono &&
+            this.shop.latitud &&
+            this.shop.longitud
+          );
+        }
+
+        return usuarioCompleto;
+      },
     },
     methods: {
       // Función para manejar la imagen seleccionada en el uploader
@@ -185,6 +246,28 @@ import dataStore from './dataStore';
           telefono: "",
         };
       },
+      obtenerCoordenadas() {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              this.shop.latitud = position.coords.latitude.toFixed(6);
+              this.shop.longitud = position.coords.longitude.toFixed(6);
+            },
+            (error) => {
+              console.error("Error obteniendo ubicación:", error);
+              this.$q.notify({
+                type: "negative",
+                message: "No se pudo obtener la ubicación",
+              });
+            }
+          );
+        } else {
+          this.$q.notify({
+            type: "negative",
+            message: "El navegador no soporta geolocalización",
+          });
+        }
+      },
     },
   };
   </script>
@@ -194,6 +277,15 @@ import dataStore from './dataStore';
     background-color: #a3a3a3;
     border-radius: 12px;
     min-height: 200px;
+  }
+  .coords {
+    min-width: 100px; /* Ajuste mínimo para mantener el diseño compacto */
+  }
+
+  @media (max-width: 768px) {
+    .coords {
+      min-width: 100%; /* Asegura que los inputs se alineen verticalmente en pantallas pequeñas */
+    }
   }
   </style>
   
