@@ -51,30 +51,47 @@ export default {
   },
   methods: {
     async handleAddToCart({ product, quantity }) {  // Desestructura para obtener product y quantity
-    try {
-      if (!this.clienteId) {
-        console.error("clienteId no está definido");
-        return;
-      }
-
-      const response = await api.post(
-        'http://rutaslaravel:8090/api/pedido/agregar-producto',
-        {
-          clienteid: this.clienteId,
-          productoid: product.id,
-          cantidad: quantity,  // Usa quantity aquí
-          descuento: 0
+      try {
+        if (!this.clienteId) {
+          console.error("clienteId no está definido");
+          return;
         }
-      );
-      this.$q.notify({
-        type: "positive",
-        message: "Agregado al carrito",
-      });
-      // console.log("Producto agregado al pedido exitosamente:", response.data);
-    } catch (error) {
-      console.error("Error al agregar producto al pedido:", error);
-    }
-  },
+
+        const quantityResponse = await api.get('/producto/obtener-cantidad', {
+          params: { nombre: product.name },
+        });
+
+        const availableQuantity = quantityResponse.data.quantity;
+
+        if (quantity > availableQuantity) {
+          this.$q.notify({
+            type: "negative",
+            message: `Solo hay ${availableQuantity} unidades disponibles de este producto.`,
+          });
+          return;
+        }else{
+          const response = await api.post(
+            'http://rutaslaravel:8090/api/pedido/agregar-producto',
+            {
+              clienteid: this.clienteId,
+              productoid: product.id,
+              cantidad: quantity,  // Usa quantity aquí
+              descuento: 0
+            }
+          );
+
+          cartStore.incrementCart(1);
+
+          this.$q.notify({
+            type: "positive",
+            message: "Agregado al carrito",
+          });
+        }
+        // console.log("Producto agregado al pedido exitosamente:", response.data);
+      } catch (error) {
+        console.error("Error al agregar producto al pedido:", error);
+      }
+    },
 
     async fetchProducts() {
       try {
@@ -105,7 +122,7 @@ export default {
         const totalEnCarrito = response.data.total;
         // console.log(totalEnCarrito);
         
-        cartStore.setCartCount(totalEnCarrito); // Actualizamos en el store de carrito
+        cartStore.setCartCount(totalEnCarrito);  // Actualizamos en el store de carrito
         
       } catch (error) {
         // console.error("Error al cargar el total del carrito:", error);

@@ -33,6 +33,7 @@
   </template>
   
   <script>
+import { api } from 'src/boot/axios';
 import { useCartStore } from 'src/stores/cart';
 
   export default {
@@ -62,8 +63,6 @@ import { useCartStore } from 'src/stores/cart';
           product: this.product,
           quantity: this.quantity,
         });
-        const cartStore = useCartStore();
-        cartStore.incrementCart(1);
       },
     },
   };

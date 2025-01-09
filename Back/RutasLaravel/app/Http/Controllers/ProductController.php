@@ -121,20 +121,37 @@ class ProductController extends Controller
     }
 
     public function obtenerIdPorNombre(Request $request)
-{
-    // Validar la solicitud
-    $validatedData = $request->validate([
-        'nombre' => 'required|string|max:255',
-    ]);
+    {
+        // Validar la solicitud
+        $validatedData = $request->validate([
+            'nombre' => 'required|string|max:255',
+        ]);
 
-    // Buscar el producto por su nombre
-    $producto = Product::where('name', $validatedData['nombre'])->first();
+        // Buscar el producto por su nombre
+        $producto = Product::where('name', $validatedData['nombre'])->first();
 
-    if (!$producto) {
-        return response()->json(['message' => 'Producto no encontrado'], 404);
+        if (!$producto) {
+            return response()->json(['message' => 'Producto no encontrado'], 404);
+        }
+
+        return response()->json(['productoid' => $producto->id, 'precio' => $producto->cost], 200);
     }
 
-    return response()->json(['productoid' => $producto->id, 'precio' => $producto->cost], 200);
-}
+    public function getQuantity(Request $request)
+    {
+        // Validar la solicitud
+        $validatedData = $request->validate([
+            'nombre' => 'required|string|max:255',
+        ]);
+
+        // Buscar el producto por su nombre
+        $producto = Product::where('name', $validatedData['nombre'])->first();
+
+        if (!$producto) {
+            return response()->json(['message' => 'Producto no encontrado'], 404);
+        }
+
+        return response()->json(['quantity' => $producto->quantity, 'precio' => $producto->cost], 200);
+    }
 
 }
