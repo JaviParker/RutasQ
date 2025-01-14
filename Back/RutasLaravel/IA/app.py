@@ -8,23 +8,21 @@ CORS(app)
 @app.route('/optimal_route', methods=['POST'])
 def optimal_route():
     data = request.json
-    points = data.get('points')  # Coordenadas recibidas
+    points = data.get('points')
     if not points:
         return jsonify({'error': 'No points provided'}), 400
 
-    start = points[0]  # Punto inicial
-    remaining = points[1:]  # Resto de los puntos
+    start = points[0]
+    remaining = points[1:]
     route = [start]
     current = start
 
     while remaining:
-        # Calcula la distancia al punto más cercano
         nearest = min(remaining, key=lambda p: haversine_distance(current, p))
         route.append(nearest)
         remaining.remove(nearest)
         current = nearest
 
-    # Cierra la ruta volviendo al inicio
     route.append(start)
     return jsonify({'route': route})
 
