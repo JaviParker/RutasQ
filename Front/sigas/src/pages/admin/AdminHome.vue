@@ -1,72 +1,115 @@
 <template>
-    <div class="page-container">
-        <div class="income">
-            <strong>Ingresos del dia</strong>
-            <b>$13500.00</b>
-        </div>
-        <OrdersCount/>
-        <IncomeHistory/>
-      <div class="btn">
-        <q-btn :to="{ name: 'adminInventory' }" rounded padding="20px 30px" color="secondary" label="Revisar inventario" class="full-width"/>
-      </div>
-      <div class="btn">
-        <q-btn :to="{ name: 'adminCheckUsers' }" rounded padding="20px 30px" color="grey" label="Registrar cliente" class="full-width"/>
-      </div>
+  <div class="page-container" ref="pdfContent">
+    
+    <div class="income">
+      <strong>Ingresos del día</strong>
+      <b>$135.00</b>
     </div>
-  </template>
+    <OrdersCount/>
+    <IncomeHistory/>
+  </div>
   
-  <script>
-  import IncomeHistory from 'src/components/IncomeHistory.vue';
-  import OrdersCount from 'src/components/OrdersCount.vue';
+  <div class="botones">
+    <div class="btn">
+      <q-btn :to="{ name: 'adminInventory' }" rounded padding="20px 30px" color="secondary" label="Revisar inventario" class="full-width"/>
+    </div>
+    <div class="btn">
+      <q-btn :to="{ name: 'adminCheckUsers' }" rounded padding="20px 30px" color="grey" label="Registrar cliente" class="full-width"/>
+    </div>
+    <div class="btn">
+      <q-btn rounded padding="20px 30px" color="secondary" label="Generar PDF" class="full-width PDF" @click="generatePdf"/>
+    </div>
+  </div>
   
-  export default {
-    components: {
-        OrdersCount,
-        IncomeHistory
+
+</template>
+
+<script>
+import IncomeHistory from 'src/components/IncomeHistory.vue';
+import OrdersCount from 'src/components/OrdersCount.vue';
+import JsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+import domToImage from 'dom-to-image-more';
+
+export default {
+  components: {
+    OrdersCount,
+    IncomeHistory
+  },
+  data() {
+    return {
+      // Datos
+    };
+  },
+  methods: {
+    handleAddToCart(item) {
+      console.log("Producto agregado al carrito:", item);
     },
-    data() {
-      return {
-        //Datos
-      };
-    },
-    methods: {
-      handleAddToCart(item) {
-        console.log("Producto agregado al carrito:", item);
-      },
-    },
-  };
-  </script>
+    generatePdf() {
+      const element = this.$refs.pdfContent;
 
-  <style scoped>
-  .page-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
+      domToImage.toPng(element)
+        .then((dataUrl) => {
+          const pdf = new JsPDF({
+            orientation: 'portrait',
+            unit: 'px',
+            format: [element.offsetWidth, element.offsetHeight]
+          });
+          const pdfWidth = pdf.internal.pageSize.getWidth();
+          const pdfHeight = pdf.internal.pageSize.getHeight();
+          const imgProps = pdf.getImageProperties(dataUrl);
+          const imgWidth = imgProps.width;
+          const imgHeight = imgProps.height;
+          const x = (pdfWidth - imgWidth) / 2;
+          const y = 0;
 
-  .income{
-    margin-top: 30px
-  }
-
-  .income strong, b{
-    justify-self: start;
-    align-items: start;
-    margin: 20px;
-    font-size: 1.3rem
-  }
-
-  .products-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); /* Define el tamaño mínimo de los elementos y los distribuye automáticamente */
-    width: 100%;
-    max-width: 1200px;
-    margin: 20px auto; /* Centra la cuadrícula horizontalmente */
-  }
-
-  @media (max-width: 768px) {
-    .products-grid {
-      grid-template-columns: 1fr; /* En pantallas pequeñas, se muestran como lista */
+          pdf.addImage(dataUrl, 'PNG', x, y, imgWidth, imgHeight);
+          pdf.save('ReporteAdmin.pdf');
+        })
+        .catch(function (error) {
+          console.error('Oops, something went wrong!', error);
+        });
     }
+  },
+};
+</script>
+
+<style scoped>
+.page-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.income {
+  margin-top: 30px;
+}
+
+.income strong, b {
+  justify-self: start;
+  align-items: start;
+  margin: 20px;
+  font-size: 1.3rem;
+}
+
+.botones{
+  justify-content: center;
+  padding: 0 35%;
+}
+.botones .btn{
+  margin-bottom: 10px;
+}
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  width: 100%;
+  max-width: 1200px;
+  margin: 20px auto;
+}
+
+@media (max-width: 768px) {
+  .products-grid {
+    grid-template-columns: 1fr;
   }
-  </style>
-  
+}
+</style>

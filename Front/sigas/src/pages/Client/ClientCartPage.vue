@@ -21,7 +21,6 @@
         <div class="col-6">
             <strong>Pagar</strong> <br>
             <q-btn :to="{ name: 'clientPay' }" color="primary" label="Ahora" class="full-width btn"/>
-            <q-btn color="green" label="En entrega" class="full-width btn"/>
         </div>
     </div>
   </template>

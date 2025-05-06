@@ -213,7 +213,7 @@ const routes = [
       },
       {
         name: "adminRegisteredClients",
-        path: "/adminRegisteredClientsn",
+        path: "/adminRegisteredClients",
         component: () => import("src/pages/admin/AdminRegisteredClients.vue"),
         meta: {
           administrador: true,
