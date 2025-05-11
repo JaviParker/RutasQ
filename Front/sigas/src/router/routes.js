@@ -114,8 +114,9 @@ const routes = [
       },
       {
         name: "orderDetails",
-        path: "/orderDetails",
+        path: "/orderDetails/:orderId-:userId",
         component: () => import("src/pages/Deliver/DeliverOrderDetails.vue"),
+        props: true,
         meta: {
           administrador: true,
           consulta: true,
@@ -248,6 +249,28 @@ const routes = [
         name: "adminProducts",
         path: "/adminProducts",
         component: () => import("src/pages/admin/AdminProducts.vue"),
+        meta: {
+          administrador: true,
+          consulta: true,
+          captura: true,
+          supervisor: true,
+        },
+      },
+      {
+        name: "adminProblems",
+        path: "/adminProblems",
+        component: () => import("src/pages/admin/AdminProblems.vue"),
+        meta: {
+          administrador: true,
+          consulta: true,
+          captura: true,
+          supervisor: true,
+        },
+      },
+      {
+        name: "addProblem",
+        path: "/AddProblem",
+        component: () => import("src/pages/Client/AddProblem.vue"),
         meta: {
           administrador: true,
           consulta: true,

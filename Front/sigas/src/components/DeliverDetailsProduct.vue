@@ -23,7 +23,7 @@
         <div class="col-auto q-gutter-xs cant">
           <div class="full-width full-height">
             <p>Ordenados</p>
-            <span>{{ product.ordered }}</span>
+            <span>{{ product.cantidad }}</span>
           </div>
         </div>
       </div>

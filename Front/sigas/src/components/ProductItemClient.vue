@@ -33,6 +33,9 @@
   </template>
   
   <script>
+import { api } from 'src/boot/axios';
+import { useCartStore } from 'src/stores/cart';
+
   export default {
     name: "ProductItemClient",
     props: {

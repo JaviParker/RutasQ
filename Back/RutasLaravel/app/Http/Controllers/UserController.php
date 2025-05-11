@@ -166,6 +166,7 @@ class UserController extends Controller
         $usuariopassword    =$request->usuariopassword;
         $rolid              =$request->rolid;
         $sucursalid         =$request->sucursalid;
+        $puntos             =$request->puntos;
 
         if(!empty($request)){
 
@@ -181,8 +182,10 @@ class UserController extends Controller
                 'usuariopassword' => 'required',
                 'rolid'           => 'required',
                 'sucursalid'      => 'required',
-
+                'puntos'          => 'required'
             ]);
+
+            $newPuntos = $puntos + 10;
 
             $password= hash('sha256',$usuariopassword);
             $params_array['usuarionombre']  =$usuarionombre;
@@ -191,6 +194,7 @@ class UserController extends Controller
             $params_array['usuariopassword']=$password;
             $params_array['rolid']          =$rolid;
             $params_array['sucursalid']     =$sucursalid;
+            $params_array['puntos']         =$newPuntos;
 
 
             unset($params_array['created_at']);
@@ -334,6 +338,189 @@ class UserController extends Controller
 
         return response()->json($data,$data['code']);
 
+    }
+
+    public function registerUserAndShop(Request $request)
+    {
+        DB::beginTransaction();
+
+        try {
+            // Validar datos
+            $validate = Validator::make($request->all(), [
+                'user.usuarionombre' => 'required|string|max:100',
+                'user.usuariomail'   => 'required|email',
+                'user.usuario'       => 'required|string',
+                'user.usuariopassword' => 'required|string',
+                'user.rolid'         => 'required|integer',
+
+                'shop.nombre'        => 'required|string|max:100',
+                'shop.direccion'     => 'required|string|max:200',
+                'shop.telefono'      => 'required|string|max:100', // Ajustar el tamaño si es necesario
+            ]);
+
+            if ($validate->fails()) {
+                return response()->json([
+                    'status' => 'error',
+                    'code' => 422,
+                    'errors' => $validate->errors(),
+                ], 422);
+            }
+
+            // Crear usuario
+            $user = new User();
+            $user->usuarionombre = $request->user['usuarionombre'];
+            $user->usuariomail = $request->user['usuariomail'];
+            $user->usuario = $request->user['usuario'];
+            $user->usuariopassword = hash('sha256', $request->user['usuariopassword']);
+            $user->rolid = $request->user['rolid'];
+            $user->save();
+
+            // Crear tienda vinculada al usuario
+            $shop = new Tienda();
+            $shop->nombre = $request->shop['nombre'];
+            $shop->direccion = $request->shop['direccion'];
+            $shop->usuarioid = $user->id; // Relación con el usuario recién creado
+            $shop->longitud = $request->shop['longitud'] ?? null;
+            $shop->latitud = $request->shop['latitud'] ?? null;
+            $shop->telefono = $request->shop['telefono'];
+            $shop->save();
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Usuario y tienda creados correctamente',
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Error al crear usuario y tienda',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function registerUser(Request $request)
+    {
+
+        // Validar datos enviados
+        $validate = Validator::make($request->all(),[
+            'usuarionombre'   => 'required',
+            'usuariomail'     => 'required',
+            'usuario'         => 'required',
+            'usuariopassword' => 'required',
+            'rolid'           => 'required',
+        ]);
+
+        if ($validate->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'code'   => 422,
+                'message'=> 'Errores de validación',
+                'errors' => $validate->errors(),
+            ]);
+        }
+
+        try {
+            // Cifrar la contraseña
+            $password = hash('sha256', $request->usuariopassword);
+
+            // Crear el usuario
+            $user = new User();
+            $user->usuarionombre    = $request->usuarionombre;
+            $user->usuariomail      = $request->usuariomail;
+            $user->usuario          = $request->usuario;
+            $user->usuariopassword  = $password;
+            $user->usuarioestatus   = 1; // Valor predeterminado
+            $user->rolid            = $request->rolid;
+            $user->sucursalid       = $request->sucursalid;
+            $user->save();
+
+            return response()->json([
+                'status'  => 'success',
+                'code'    => 200,
+                'message' => 'Usuario registrado correctamente',
+                'data'    => $user,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status'  => 'error',
+                'code'    => 500,
+                'message' => 'Hubo un error al registrar el usuario',
+                'error'   => $e->getMessage(),
+            ]);
+        }
+    }
+
+    public function getUserIdByEmail(Request $request)
+    {
+        // Validamos que el email esté presente en la URL
+        $request->validate([
+            'email' => 'required|email',
+        ]);
+
+        // Buscamos al usuario en la base de datos usando el email
+        $user = User::where('usuariomail', $request->query('email'))->first();
+
+        if ($user) {
+            return response()->json([
+                'status' => 'success',
+                'data' => ['id' => $user->usuarioid], // Retornamos el ID del usuario
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Usuario no encontrado',
+        ]);
+    }
+
+    public function obtenerPuntos($usuarioid)
+    {
+        $usuario = User::select('puntos')->where('usuarioid', $usuarioid)->first();
+
+        if ($usuario) {
+            return response()->json([
+                'status' => 'success',
+                'code'   => 200,
+                'puntos' => $usuario->puntos,
+            ]);
+        } else {
+            return response()->json([
+                'status' => 'error',
+                'code'   => 404,
+                'message'=> 'Usuario no encontrado',
+            ]);
+        }
+    }
+
+    public function actualizarPuntos(Request $request, $usuarioid)
+    {
+        try {
+            $usuario = User::where('usuarioid', $usuarioid)->first();
+            $usuario->puntos += 10; // Sumar 10 puntos
+            $usuario->save();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Puntos actualizados exitosamente',
+                'puntos' => $usuario->puntos,
+            ], 200);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Usuario no encontrado',
+            ], 404);
+        } catch (\Exception $e) {
+            $usuario = User::findOrFail($usuarioid);
+            return response()->json([
+                'status' => 'error',
+                'datos' => $usuario,
+                'message' => 'Error al actualizar puntos',
+            ], 500);
+        }
     }
 
 }

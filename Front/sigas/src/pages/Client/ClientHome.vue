@@ -1,7 +1,9 @@
 <template>
   <div class="page-container">
     <div class="carousel-container">
-      <CategoryCarousel />
+      <CategoryCarousel 
+        :categories="categories"
+      />
     </div>
     <div class="products-grid">
       <ProductItemClient
@@ -20,8 +22,10 @@ import ProductItemClient from "../../components/ProductItemClient.vue";
 import { useAuthStore } from "stores/auth";
 import { computed } from "vue";
 import { api } from "../../boot/axios";
+import { useCartStore } from "src/stores/cart";
 
 const store = useAuthStore();
+const cartStore = useCartStore();
 
 export default {
   components: {
@@ -31,10 +35,13 @@ export default {
   data() {
     return {
       products: [],
+      categories: [],
     };
   },
   mounted() {
     this.fetchProducts(); // Llama a la función cuando el componente se monta
+    this.fetchCategories();
+    this.fetchCartTotal(this.clienteId);
   },
   setup() {
     const clienteId = computed(() => store.usuario?.usuarioid);
@@ -44,26 +51,47 @@ export default {
   },
   methods: {
     async handleAddToCart({ product, quantity }) {  // Desestructura para obtener product y quantity
-    try {
-      if (!this.clienteId) {
-        console.error("clienteId no está definido");
-        return;
-      }
-
-      const response = await api.post(
-        'http://rutaslaravel:8090/api/pedido/agregar-producto',
-        {
-          clienteid: this.clienteId,
-          productoid: product.id,
-          cantidad: quantity,  // Usa quantity aquí
+      try {
+        if (!this.clienteId) {
+          console.error("clienteId no está definido");
+          return;
         }
-      );
 
-      console.log("Producto agregado al pedido exitosamente:", response.data);
-    } catch (error) {
-      console.error("Error al agregar producto al pedido:", error);
-    }
-  },
+        const quantityResponse = await api.get('/producto/obtener-cantidad', {
+          params: { nombre: product.name },
+        });
+
+        const availableQuantity = quantityResponse.data.quantity;
+
+        if (quantity > availableQuantity) {
+          this.$q.notify({
+            type: "negative",
+            message: `Solo hay ${availableQuantity} unidades disponibles de este producto.`,
+          });
+          return;
+        }else{
+          const response = await api.post(
+            'http://rutaslaravel:8090/api/pedido/agregar-producto',
+            {
+              clienteid: this.clienteId,
+              productoid: product.id,
+              cantidad: quantity,  // Usa quantity aquí
+              descuento: 0
+            }
+          );
+
+          cartStore.incrementCart(1);
+
+          this.$q.notify({
+            type: "positive",
+            message: "Agregado al carrito",
+          });
+        }
+        // console.log("Producto agregado al pedido exitosamente:", response.data);
+      } catch (error) {
+        console.error("Error al agregar producto al pedido:", error);
+      }
+    },
 
     async fetchProducts() {
       try {
@@ -72,13 +100,34 @@ export default {
 
         // Asignar los productos recibidos al array products
         this.products = response.data;
-        console.log(this.products);
-        console.log(this.clienteId);
         
       } catch (error) {
         console.error("Error al obtener productos:", error);
       }
     },
+    async fetchCategories(){
+      try {
+        const response = await api.get("/categories");
+        this.categories = response.data;
+      } catch (error) {
+        console.log(error);
+                
+      }
+    },
+    async fetchCartTotal(clienteId){
+      try {
+        const response = await api.get(`/totalEnCarrito/${clienteId}`);
+        console.log(response);
+        
+        const totalEnCarrito = response.data.total;
+        // console.log(totalEnCarrito);
+        
+        cartStore.setCartCount(totalEnCarrito);  // Actualizamos en el store de carrito
+        
+      } catch (error) {
+        // console.error("Error al cargar el total del carrito:", error);
+      }
+    }
   },
 };
 </script>

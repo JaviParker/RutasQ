@@ -31,7 +31,8 @@ class NotificationController extends Controller
             'precio' => 'required|numeric',
             'tipo_oferta_aviso' => 'required|string',
             'descripcion' => 'required|string',
-            'imagen' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'imagen' => 'nullable',
+            'puntos' => 'nullable|string',
         ]);
 
         $notification = new Notification($validated);

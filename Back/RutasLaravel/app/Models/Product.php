@@ -11,7 +11,7 @@ class Product extends Model
 
     protected $table = 'products';
 
-    protected $fillable = ['name', 'package', 'detail', 'sku', 'cost', 'quantity', 'image'];
+    protected $fillable = ['name', 'package', 'detail', 'sku', 'cost', 'quantity', 'image', 'category', 'min_quantity'];
 
     public $timestamps = false;
 }

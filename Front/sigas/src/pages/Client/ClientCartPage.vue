@@ -6,6 +6,7 @@
         :key="product.id"
         :product="product"
         :initialQuantity="product.cantidad"
+        @update-quantity="updateQuantity"
         />
       </div>
       <!-- <ProductItemClient
@@ -17,10 +18,13 @@
         <div class="col-6">
             <strong>Total</strong> <br>
             <b>${{ this.total }}</b>
+            <p class="q-mt-lg">Descuento aplicado</p>
+            <p class="q-mt-xs">Ahorraste ${{  this.descuento  }}</p>
         </div>
         <div class="col-6">
             <strong>Pagar</strong> <br>
             <q-btn :to="{ name: 'clientPay' }" color="primary" label="Ahora" class="full-width btn"/>
+            <q-btn color="green" label="En entrega" class="full-width btn" @click="registrarCompra"/>
         </div>
     </div>
   </template>
@@ -30,8 +34,10 @@
   import { api } from "../../boot/axios";
   import { useAuthStore } from "stores/auth";
   import { computed } from "vue";
+  import { useCartStore } from 'src/stores/cart';
 
   const store = useAuthStore();
+  const cartStore = useCartStore();
 
   export default {
     components: {
@@ -40,6 +46,7 @@
     data() {
       return {
         products: [],
+        descuento: 0,
       };
     },
     setup() {
@@ -56,17 +63,98 @@
         try {
           const response = await api.get(`/pedido/${this.clienteId}/ver-carrito`);
           this.products = response.data.productos;
-          console.log(this.products);
           
-          this.total = response.data.total;
-          console.log(this.total);
+          this.descuento = response.data.pedido.descuento || 0;
+          
+          this.total = response.data.total - this.descuento;
           
         } catch (error) {
-          console.error("Error al cargar el carrito:", error);
+          console.log("Carrito vacio");
+        }
+      },
+      async updateQuantity({ productId, quantity }) {
+        const productIndex = this.products.findIndex((item) => item.id === productId);
+
+        if (productIndex !== -1) {
+          if (quantity === 0) {
+            // Eliminar el producto del carrito
+            this.products.splice(productIndex, 1);
+            const pre_id = await api.get(`/totalEnCarrito/${this.clienteId}`);
+            const pedidoId = pre_id.data.pedidoid;
+            const response = await api.post('/eliminar-producto', {
+              pedidoid: pedidoId,
+              productoid: productId,
+            });
+            this.fetchCartTotal(this.clienteId);
+            
+          } else {
+            // Actualizar la cantidad localmente
+            this.products[productIndex].cantidad = quantity;
+          }
+
+          // Recalcular el total dinámicamente
+          this.total = this.products.reduce((acc, item) => acc + item.cantidad * item.cost, 0);
+        }
+      },
+      async fetchCartTotal(clienteId){
+        try {
+          const response = await api.get(`/totalEnCarrito/${clienteId}`);
+          
+          const totalEnCarrito = response.data.total;
+          cartStore.setCartCount(totalEnCarrito);
+          
+        } catch (error) {
+          // console.error("Error al cargar el total del carrito:", error);
         }
       },
       handleAddToCart(item) {
         console.log("Producto agregado al carrito:", item);
+      },
+      async registrarCompra() {
+        try {
+          const productos = this.products.map(product => ({
+            id: product.id,
+            cantidad: product.cantidad,
+          }));
+
+          const payload = {
+            productos,
+            total: this.total.toString(),
+          };
+
+          await api.post('/historial-compra', payload);
+
+          // Cambiar el estado del pedido a no confirmado
+          await api.put(`/pedido/${this.clienteId}/enviar`);
+
+          // Actualizar los puntos del usuario
+          const response = await api.put(
+            `/usuarios/${this.clienteId}/puntos`,
+            {
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            }
+          );
+
+          cartStore.setCartCount(0);
+          // Limpiar carrito local y recargar
+          this.products = [];
+          this.total = 0;
+
+          this.$q.notify({
+            type: 'positive',
+            message: 'Compra registrada y carrito actualizado',
+          });
+          
+          this.$router.push({ name: 'clientHome' });
+        } catch (error) {
+          console.error("Error al registrar la compra:", error);
+          this.$q.notify({
+            type: 'negative',
+            message: 'Error al procesar la compra',
+          });
+        }
       },
     },
   };

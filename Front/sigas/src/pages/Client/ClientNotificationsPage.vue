@@ -1,8 +1,11 @@
 <template>
   <div class="q-pa-md products-grid">
+    <div align="center" class="q-mb-lg">
+      <strong style="font-size: 1.5rem;">Puntos: {{ usuarioPuntos }}</strong>
+    </div>
     <!-- Lista de notificaciones -->
     <div v-for="(notification, index) in notifications" :key="index" class="q-mb-md">
-      <NotificationOffer :offer="notification" @add-to-cart="handleAddToCart" />
+      <NotificationOffer :offer="notification" :puntos="usuarioPuntos" @add-to-cart="handleAddToCart" />
     </div>
   </div>
 </template>
@@ -11,7 +14,9 @@
 // Importamos el componente NotificationOffer
 import NotificationOffer from "components/NotificationOffer.vue";
 import { api } from '../../boot/axios';
+import { useAuthStore } from "stores/auth";
 
+const store = useAuthStore();
 export default {
   name: "NotificationsPage",
   components: {
@@ -21,6 +26,7 @@ export default {
     return {
       // Arreglo de notificaciones simuladas
       notifications: [],
+      usuarioPuntos: 0,
     };
   },
   mounted() {
@@ -31,7 +37,8 @@ export default {
       try {
         // Hacer una solicitud GET a la API de productos
         const response = await api.get('http://localhost:8090/api/notifications');
-        
+        const response2 = await api.get(`/usuarios/${store.usuario.usuarioid}/puntos`);
+        this.usuarioPuntos = response2.data.puntos;
         // Asignar los productos recibidos al array products
         this.notifications = response.data;
         console.log(this.notifications);

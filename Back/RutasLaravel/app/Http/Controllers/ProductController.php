@@ -27,6 +27,8 @@ class ProductController extends Controller
             'cost' => 'required|string|max:100',
             'quantity' => 'required|string|max:100',
             'image' => 'nullable',
+            'category' => 'required',
+            'min_quantity' => 'required'
         ]);
 
         // Crear el producto
@@ -54,7 +56,9 @@ class ProductController extends Controller
             'sku' => 'nullable|integer|min:0',
             'cost' => 'nullable|numeric|min:0',
             'quantity' => 'nullable|integer|min:0',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'image' => 'nullable',
+            'category' => 'required',
+            'min_quantity' => 'required',
         ]);
     
         try {
@@ -62,7 +66,7 @@ class ProductController extends Controller
             $product = Product::findOrFail($id);
     
             // Actualiza los campos si están presentes en la solicitud
-            foreach (['name', 'package', 'detail', 'sku', 'cost', 'quantity'] as $field) {
+            foreach (['name', 'package', 'detail', 'sku', 'cost', 'quantity', 'category', 'min_quantity'] as $field) {
                 if ($request->filled($field)) {
                     $product->$field = $request->input($field);
                 }
@@ -95,26 +99,59 @@ class ProductController extends Controller
     
 
     public function destroy($id)
-{
-    try {
-        $product = Product::findOrFail($id);
-        $product->delete();
+    {
+        try {
+            $product = Product::findOrFail($id);
+            $product->delete();
 
-        \Log::info("Producto eliminado correctamente: ID {$id}");
+            \Log::info("Producto eliminado correctamente: ID {$id}");
 
-        return response()->json([
-            'message' => 'Producto eliminado correctamente',
-            'id' => $id
-        ], 200);
-    } catch (\Exception $e) {
-        \Log::error("Error al eliminar el producto: {$e->getMessage()}");
+            return response()->json([
+                'message' => 'Producto eliminado correctamente',
+                'id' => $id
+            ], 200);
+        } catch (\Exception $e) {
+            \Log::error("Error al eliminar el producto: {$e->getMessage()}");
 
-        return response()->json([
-            'message' => 'Error al eliminar el producto',
-            'error' => $e->getMessage()
-        ], 500);
+            return response()->json([
+                'message' => 'Error al eliminar el producto',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
-}
 
+    public function obtenerIdPorNombre(Request $request)
+    {
+        // Validar la solicitud
+        $validatedData = $request->validate([
+            'nombre' => 'required|string|max:255',
+        ]);
+
+        // Buscar el producto por su nombre
+        $producto = Product::where('name', $validatedData['nombre'])->first();
+
+        if (!$producto) {
+            return response()->json(['message' => 'Producto no encontrado'], 404);
+        }
+
+        return response()->json(['productoid' => $producto->id, 'precio' => $producto->cost], 200);
+    }
+
+    public function getQuantity(Request $request)
+    {
+        // Validar la solicitud
+        $validatedData = $request->validate([
+            'nombre' => 'required|string|max:255',
+        ]);
+
+        // Buscar el producto por su nombre
+        $producto = Product::where('name', $validatedData['nombre'])->first();
+
+        if (!$producto) {
+            return response()->json(['message' => 'Producto no encontrado'], 404);
+        }
+
+        return response()->json(['quantity' => $producto->quantity, 'precio' => $producto->cost], 200);
+    }
 
 }

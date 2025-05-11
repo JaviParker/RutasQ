@@ -15,7 +15,9 @@
         <q-toolbar-title>{{ nameG }}</q-toolbar-title>
 
         <q-btn v-if="tipoUsuario === 4" clickable :to="{ name: 'clientNotifications' }" flat round dense icon="notifications" @click="changeTitle('Notificaciones')"></q-btn>
-        <q-btn v-if="tipoUsuario === 4" clickable :to="{ name: 'clientCart' }" flat round dense icon="shopping_cart" @click="changeTitle('Carrito')"></q-btn>
+        <q-btn v-if="tipoUsuario === 4" clickable :to="{ name: 'clientCart' }" flat round dense icon="shopping_cart" @click="changeTitle('Carrito')">
+          <q-badge v-if="badgeCount > 0" color="red" floating>{{ badgeCount }}</q-badge>
+        </q-btn>
         <q-btn v-if="tipoUsuario === 4" clickable :to="{ name: 'clientHome' }" flat round dense icon="home" @click="changeTitle('Inicio')"></q-btn>
         
         <!-- Icono de clima si el usuario es tipo 5 -->
@@ -83,6 +85,13 @@
             </q-item>
           </q-list>
 
+          <q-list v-if="tipoUsuario === 1">
+            <q-item clickable v-ripple :to="{ name: 'adminProblems' }" @click="changeTitle('Incidencias')">
+              <q-item-section avatar><q-icon color="primary" name="feedback"></q-icon></q-item-section>
+              <q-item-section>Incidencias</q-item-section>
+            </q-item>
+          </q-list>
+
         <q-expansion-item v-if="tipoUsuario === 1" icon="settings" label="Parametros">
           <q-list>
             <q-item clickable v-ripple :to="{ name: 'usuario' }" @click="changeTitle('Usuarios')">
@@ -134,10 +143,24 @@
           </q-item>
         </q-list>
 
-        <q-list v-if="tipoUsuario === 4">
+        <!-- <q-list v-if="tipoUsuario === 4">
           <q-item clickable v-ripple :to="{ name: 'clientNotifications' }" @click="changeTitle('Notificaciones y ofertas')">
             <q-item-section avatar><q-icon color="primary" name="notifications"></q-icon></q-item-section>
             <q-item-section>Notificaciones y ofertas</q-item-section>
+          </q-item>
+        </q-list> -->
+
+        <q-list v-if="tipoUsuario === 4">
+          <q-item clickable v-ripple :to="{ name: 'addProblem' }" @click="changeTitle('Crear incidencia')">
+            <q-item-section avatar><q-icon color="primary" name="feedback"></q-icon></q-item-section>
+            <q-item-section>Crear incidencia</q-item-section>
+          </q-item>
+        </q-list>
+
+        <q-list v-if="tipoUsuario === 4">
+          <q-item clickable v-ripple :to="{ name: 'clientNotifications' }" @click="changeTitle('Crear incidencia')">
+            <q-item-section avatar><q-icon color="primary" name="notifications"></q-icon></q-item-section>
+            <q-item-section>Ofertas/Marketing</q-item-section>
           </q-item>
         </q-list>
 
@@ -168,6 +191,13 @@
             <q-item-section>Chat</q-item-section>
           </q-item>
         </q-list>
+        
+        <q-list v-if="tipoUsuario === 5">
+          <q-item clickable v-ripple :to="{ name: 'addProblem' }" @click="changeTitle('Crear incidencia')">
+            <q-item-section avatar><q-icon color="primary" name="feedback"></q-icon></q-item-section>
+            <q-item-section>Crear incidencia</q-item-section>
+          </q-item>
+        </q-list>
       </q-list>
     </q-drawer>
 
@@ -180,24 +210,75 @@
 <script setup>
 import { ref, computed, watch, onMounted } from "vue";
 import { useAuthStore } from "stores/auth";
+import { useCartStore } from "src/stores/cart";
 import { useRouter, useRoute } from "vue-router";
+import { api } from "src/boot/axios";
 
-const store = useAuthStore();
+// Stores
+const authStore = useAuthStore();
+const cartStore = useCartStore();
+
+// Vue Router
 const router = useRouter();
-const nameG = ref("Inicio");
 const route = useRoute();
 const weatherInfo = ref(null);
 
-const isLoginPage = computed(() => route.name === 'login');
-const logueado = computed(() => store.usuario);
-const tipoUsuario = computed(() => store.usuario?.rolid);
 
-watch(tipoUsuario, async (nuevoTipo) => {
-  if (nuevoTipo === 5 && !weatherInfo.value) {
-    await fetchWeather();
-    nameG.value = "Repartidor";
+// Reactive data
+const nameG = ref("Inicio");
+const leftDrawerOpen = ref(false);
+const isLoginPage = computed(() => route.name === "login");
+const logueado = computed(() => authStore.usuario);
+
+// Computed values
+const tipoUsuario = computed(() => authStore.usuario?.rolid);
+const clienteId = computed(() => authStore.usuario?.usuarioid);
+const badgeCount = computed(() => cartStore.cartItemCount);
+
+// Functions
+const changeTitle = (title) => {
+  nameG.value = title;
+};
+
+const toggleLeftDrawer = () => {
+  leftDrawerOpen.value = !leftDrawerOpen.value;
+};
+
+const salir = async () => {
+  authStore.$reset();
+  router.push({ name: "login" });
+  leftDrawerOpen.value = false;
+};
+
+const fetchCartTotal = async (clienteId) => {
+  try {
+    const response = await api.get(`/totalEnCarrito/${clienteId}`);
+    console.log(response);
+    
+    const totalEnCarrito = response.data.total;
+    // console.log(totalEnCarrito);
+    
+    cartStore.setCartCount(totalEnCarrito); // Actualizamos en el store de carrito
+    
+  } catch (error) {
+    console.error("Error al cargar el total del carrito:", error);
   }
-});
+};
+
+// Watchers
+watch(
+  () => authStore.usuario,
+  (newVal) => {
+    if (newVal) {
+      console.log("Cambio detectado en store.usuario:", newVal);
+      console.log("Rol de usuario:", newVal.rolid);
+    } else {
+      console.error("Error: Usuario no encontrado en store.");
+    }
+  }
+);
+
+// Lifecycle hooks
 
 // Verificar si el rol está correctamente cargado al montar el componente
 onMounted(() => {
@@ -206,6 +287,12 @@ onMounted(() => {
   } else if (tipoUsuario.value === 1) {
     nameG.value = "Administrador";
   }
+
+  
+  // Cargar el total del carrito al montar el componente
+  if (clienteId.value) {
+    fetchCartTotal(clienteId.value);
+
 });
 
 
@@ -287,25 +374,11 @@ watch(() => store.usuario, (newVal) => {
     console.error("Error: Usuario no encontrado en store.");
   } else {
     console.log("Rol de usuario:", newVal.tipo_usuario);
+
   }
 });
-
-const changeTitle = (title) => {
-  nameG.value = title; // Cambiar el título
-};
-
-const leftDrawerOpen = ref(false);
-
-function toggleLeftDrawer() {
-  leftDrawerOpen.value = !leftDrawerOpen.value;
-}
-
-async function salir() {
-  store.$reset();
-  router.push({ name: "login" });
-  leftDrawerOpen.value = false;
-}
 </script>
+
 
 <style scoped>
 header {

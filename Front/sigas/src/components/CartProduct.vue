@@ -14,6 +14,7 @@
               <p>{{ product.package }}</p>
               <p>{{ product.detail }}</p>
               <p>SKU: {{ product.sku }}</p>
+              <p class="cost">${{ product.cost }}</p>
             </div>
           </div>
         </div>
@@ -21,12 +22,26 @@
         <!-- Sección del seleccionador de cantidad -->
         <div class="col-auto q-gutter-xs buttons">
           <div class="full-width full-height">
-            <q-btn flat icon="remove" @click="decreaseQuantity" />
+            <q-btn flat icon="remove" @click="confirmDecrease" />
             <span>{{ quantity }}</span>
             <q-btn flat icon="add" @click="increaseQuantity" />
           </div>
         </div>
       </div>
+
+      <!-- Diálogo de confirmación -->
+      <q-dialog v-model="showConfirmDialog">
+        <q-card>
+          <q-card-section>
+            <div class="text-h6">¿Eliminar este producto del carrito?</div>
+          </q-card-section>
+
+          <q-card-actions align="right">
+            <q-btn flat label="Cancelar" v-close-popup />
+            <q-btn flat label="Eliminar" color="negative" @click="confirmDelete" />
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
     </q-card>
   </template>
   
@@ -46,16 +61,30 @@
     data() {
       return {
         quantity: this.initialQuantity ?? 1, // Usar initialQuantity si está definida, de lo contrario, iniciar en 1
+        showConfirmDialog: false,
       };
     },
     methods: {
       increaseQuantity() {
         this.quantity++;
+        this.$emit("update-quantity", { productId: this.product.id, quantity: this.quantity });
+      },
+      confirmDecrease() {
+        if (this.quantity === 1) {
+          this.showConfirmDialog = true;
+        } else {
+          this.decreaseQuantity();
+        }
       },
       decreaseQuantity() {
         if (this.quantity > 1) {
           this.quantity--;
-        }
+          this.$emit("update-quantity", { productId: this.product.id, quantity: this.quantity });
+      }
+      },
+      confirmDelete() {
+        this.$emit("update-quantity", { productId: this.product.id, quantity: 0 });
+        this.showConfirmDialog = false;
       },
       addToCart() {
         this.$emit("add-to-cart", {
@@ -92,6 +121,11 @@
   }
   .buttons{
     align-self: center;
+  }
+  .cost{
+    font-size: 15px!important;
+    font-weight: bolder;
+    color: #001D6C;
   }
   </style>
   
