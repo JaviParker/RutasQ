@@ -35,7 +35,7 @@
     },
     data() {
       return {
-        url: "https://via.placeholder.com/150",
+        url: "https://placehold.co/150x150/000000/DCDCDC",
       };
     },
     created() {

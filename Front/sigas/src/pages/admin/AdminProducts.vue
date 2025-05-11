@@ -227,7 +227,7 @@ export default {
       sku: this.sku,
       cost: this.precio,
       quantity: this.cantidad,
-      image: "https://via.placeholder.com/100",
+      image: "https://picsum.photos/300/200",
       category: categoryToSubmit,
       min_quantity: this.min_quantity,
   };

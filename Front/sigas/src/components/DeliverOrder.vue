@@ -3,7 +3,7 @@
       <div class="row">
         <!-- Sección de la imagen -->
         <div class="col-auto">
-          <q-img :src="order.image" alt="Imagen del producto" class="product-image" />
+          <q-img src="https://placehold.co/100x100/000000/DCDCDC" alt="Imagen del producto" class="product-image" />
         </div>
   
         <!-- Sección de la información -->

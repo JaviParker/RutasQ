@@ -104,7 +104,7 @@
           usuariomail: "",
           usuario: "",
           usuariopassword: "",
-          rolid: "Administrador",
+          rolid: "Seleccionar",
         },
         shop: {
           nombre: "",
