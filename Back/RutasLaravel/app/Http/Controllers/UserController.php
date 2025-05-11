@@ -104,44 +104,58 @@ class UserController extends Controller
     }
 
     public function login(Request $request){
-        $jwtAuth =new \App\Helpers\JwtAuth();
-
-        $usuariomail        =$request->usuariomail;
-        $usuariopassword    =$request->usuariopassword;
-
-        // Validad datos
-        $validate = Validator::make($request->all(),[
-            'usuariomail'     => 'required',// Comprueba si es unico
+        $jwtAuth = new \App\Helpers\JwtAuth();
+    
+        $usuariomail = strtolower(trim($request->usuariomail));
+        $usuariopassword = $request->usuariopassword;
+    
+        // Validación
+        $validate = Validator::make($request->all(), [
+            'usuariomail'     => 'required',
             'usuariopassword' => 'required',
         ]);
-
-        if ($validate->fails()){
-
-            $signup = array(
+    
+        if ($validate->fails()) {
+            return response()->json([
                 'status' => 'error',
                 'code'   => '404',
                 'message'=> 'El Usuario no se ha Logueado',
                 'errors' => $validate->errors()
-            );
-        }else {
-
-             // encripta el password
-            $password= hash('sha256',$usuariopassword);
-            // Regresa el token
-            $signup1= $jwtAuth->signup($usuariomail,$password);
-            //if(!empty($params->gettoken)){
-            //    $signup1= $jwtAuth->signup($params->usuariomail,$password,true);
-            //}
-
-            $signup = array(
-                'token' => $signup1
-            );
-
+            ], 404);
         }
-
-        // Regresa los datos
-        return response()->json($signup,200);
+    
+        // Encriptar el password
+        $password = hash('sha256', $usuariopassword);
+    
+        // 🔍 Debug temporal
+        $usuarioEncontrado = User::where('usuariomail', $usuariomail)->first();
+        if (!$usuarioEncontrado) {
+            return response()->json([
+                'status' => 'error',
+                'code'   => 404,
+                'message' => 'Correo no encontrado en la base de datos',
+                'correo_enviado' => $usuariomail
+            ], 404);
+        }
+    
+        if ($usuarioEncontrado->usuariopassword !== $password) {
+            return response()->json([
+                'status' => 'error',
+                'code'   => 401,
+                'message' => 'Contraseña incorrecta',
+                'password_esperado' => $usuarioEncontrado->usuariopassword,
+                'password_enviado' => $password
+            ], 401);
+        }
+    
+        // Si todo está bien, genera el token
+        $signup1 = $jwtAuth->signup($usuariomail, $password);
+    
+        return response()->json([
+            'token' => $signup1
+        ], 200);
     }
+    
 
     public function update(Request $request){
 

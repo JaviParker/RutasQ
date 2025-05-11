@@ -23,6 +23,7 @@ use App\Models\Sucursal;
 use App\Models\Product;
 use App\Models\Notification;
 
+use Illuminate\Support\Facades\DB;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -33,6 +34,12 @@ use App\Models\Notification;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
+
+Route::get('/test-db', function () {
+    $host = DB::select("SELECT @@hostname as host;");
+    dd($host);
+});
+
 
 //Usuarios
 Route::get('/usuarios/listar/',[UserController::class,'listar'])->middleware(ApiAuthMiddleware::class);

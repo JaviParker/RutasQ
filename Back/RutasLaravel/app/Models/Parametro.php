@@ -7,6 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 class Parametro extends Model
 {
     // Asigna la tabla al modelo
-    protected $table = 'Parametro';
+    protected $table = 'parametro';
 
 }

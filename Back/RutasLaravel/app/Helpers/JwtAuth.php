@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\parametro;
 
 
+
 class JwtAuth{
 
     public $key;

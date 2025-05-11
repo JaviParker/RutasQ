@@ -20,6 +20,26 @@
         </q-btn>
         <q-btn v-if="tipoUsuario === 4" clickable :to="{ name: 'clientHome' }" flat round dense icon="home" @click="changeTitle('Inicio')"></q-btn>
         
+        <!-- Icono de clima si el usuario es tipo 5 -->
+        <q-tooltip v-if="tipoUsuario === 5 && weatherInfo" :delay="500">
+          {{ weatherInfo.traduccion }}
+        </q-tooltip>
+
+        <q-btn
+          v-if="tipoUsuario === 5 && weatherInfo"
+          :icon="getWeatherIcon()"
+          flat
+          round
+          dense
+          :label="weatherInfo.conditionTraducido"
+        />
+
+
+        <q-tooltip v-if="tipoUsuario === 5 && weatherInfo" :delay="500">
+          {{ weatherInfo.traduccion }}
+        </q-tooltip>
+
+
         <q-btn v-if="tipoUsuario === 5" clickable :to="{ name: 'deliverChat' }" flat round dense icon="chat" @click="changeTitle('Chat de repartidores')"></q-btn>
         <q-btn v-if="tipoUsuario === 5" clickable :to="{ name: 'deliverHome' }" flat round dense icon="home" @click="changeTitle('Inicio')"></q-btn>
 
@@ -201,6 +221,8 @@ const cartStore = useCartStore();
 // Vue Router
 const router = useRouter();
 const route = useRoute();
+const weatherInfo = ref(null);
+
 
 // Reactive data
 const nameG = ref("Inicio");
@@ -257,18 +279,102 @@ watch(
 );
 
 // Lifecycle hooks
+
+// Verificar si el rol está correctamente cargado al montar el componente
 onMounted(() => {
-  if (tipoUsuario.value === 1) {
-    nameG.value = "Administrador";
-  } else if (tipoUsuario.value === 4) {
+  if (tipoUsuario.value === 4) {
     nameG.value = "Tienda";
-  } else if (tipoUsuario.value === 5) {
-    nameG.value = "Repartidor";
+  } else if (tipoUsuario.value === 1) {
+    nameG.value = "Administrador";
   }
+
   
   // Cargar el total del carrito al montar el componente
   if (clienteId.value) {
     fetchCartTotal(clienteId.value);
+
+});
+
+
+async function fetchWeather() {
+  const url = "https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/durango?unitGroup=us&include=days%2Ccurrent&key=V9SS255HUXL8BQ7K6JQJ4CXYU&contentType=json";
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+
+    const condition = data.days[0]?.conditions || "Desconocido";
+    const description = data.days[0]?.description || "Sin descripción";
+
+    weatherInfo.value = {
+      condition,
+      description,
+      traduccion: traducirClima(condition, description),
+      conditionTraducido: traducirCondition(condition)
+    };
+
+
+    console.log(condition);
+    console.log(description);
+  } catch (error) {
+    console.error("Error al obtener clima:", error);
+  }
+}
+
+function traducirCondition(condition) {
+  const cond = condition?.toLowerCase() || "";
+
+  if (cond.includes("clear")) {
+    return "Despejado";
+  }
+  if (cond.includes("partially") && cond.includes("rain")) {
+    return "Lluvia, parcialmente nublado";
+  }
+  if (cond.includes("partially")) {
+    return "Parcialmente nublado";
+  }
+
+  return "Clima no especificado";
+}
+
+function traducirClima(condition, description) {
+  const cond = condition?.toLowerCase() || "";
+  const desc = description?.toLowerCase() || "";
+
+  if (cond.includes("partially") || desc.includes("partly")) {
+    if (desc.includes("late afternoon rain")) {
+      return "Parcialmente nublado con lluvia por la tarde.";
+    } else if (desc.includes("clearing in the afternoon")) {
+      return "Parcialmente nublado, despejando por la tarde.";
+    } else if (desc.includes("throughout the day")) {
+      return "Parcialmente nublado durante el día.";
+    }
+    return "Parcialmente nublado.";
+  }
+
+  if (cond.includes("clear")) {
+    return "Despejado durante todo el día.";
+  }
+
+  return "Condiciones climáticas no especificadas.";
+}
+
+
+
+function getWeatherIcon() {
+  if (weatherInfo.value?.condition === "Partially cloudy") {
+    return "cloud_queue"; // ícono de nube
+  }
+  return "wb_sunny"; // ícono de sol por defecto
+}
+
+// Monitorea los cambios en `store.usuario` y actualiza `tipoUsuario` cuando cambie
+watch(() => store.usuario, (newVal) => {
+  console.log("Cambio detectado en store.usuario:", newVal);
+  if (!newVal) {
+    console.error("Error: Usuario no encontrado en store.");
+  } else {
+    console.log("Rol de usuario:", newVal.tipo_usuario);
+
   }
 });
 </script>
