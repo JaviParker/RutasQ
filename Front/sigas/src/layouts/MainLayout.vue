@@ -217,7 +217,7 @@ import { api } from "src/boot/axios";
 // Stores
 const authStore = useAuthStore();
 const cartStore = useCartStore();
-
+const store = useAuthStore();
 // Vue Router
 const router = useRouter();
 const route = useRoute();
@@ -275,6 +275,11 @@ watch(
     } else {
       console.error("Error: Usuario no encontrado en store.");
     }
+    if (tipoUsuario.value === 5) {
+      nameG.value = "Repartidor";
+      fetchWeather();
+    }
+    
   }
 );
 
@@ -288,10 +293,10 @@ onMounted(() => {
     nameG.value = "Administrador";
   }
 
-  
   // Cargar el total del carrito al montar el componente
   if (clienteId.value) {
-    fetchCartTotal(clienteId.value);
+      fetchCartTotal(clienteId.value);
+    }
 
 });
 
